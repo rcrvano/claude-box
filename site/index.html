@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <script>document.documentElement.classList.add('js')</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>claude-box — Run Claude Code on auto, safely boxed in Docker</title>
+  <meta name="description" content="claude-box runs Claude Code in a Docker sandbox you open from any browser. Let it run on auto mode without fear — only /workspace is mounted and all traffic is proxied. Web terminal, live session launcher, phone access, notifications. Open source, MIT.">
+  <meta property="og:title" content="claude-box — Run Claude Code on auto, safely boxed">
+  <meta property="og:description" content="A Dockerized Claude Code with a web terminal, a live session launcher, and phone access. Let it run on auto — it can't touch anything outside the box.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+  <link rel="apple-touch-icon" href="/favicon-180.png">
+  <link rel="preload" href="/fonts/space-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-paper font-sans text-ink antialiased">
+
+  <a href="#top" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-iris focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white">Skip to content</a>
+
+  <!-- ═══ statusline / nav ═══ -->
+  <header id="nav" class="statusline">
+    <nav class="section flex items-center gap-4 py-2.5 font-mono text-[12.5px] text-slate" aria-label="Primary">
+      <a href="#top" class="brand"><img src="/brand-mark.svg" alt="" class="brand-mark" width="22" height="22">claude-<b>box</b></a>
+      <span class="hidden items-center gap-2 lg:inline-flex"><span class="dot"></span> 3 sessions running</span>
+      <span class="hidden text-line lg:inline">·</span>
+      <span class="hidden lg:inline">docker · MIT</span>
+      <span class="flex-1"></span>
+      <button id="nav-toggle" class="text-base text-ink md:hidden" aria-label="Toggle menu" aria-expanded="false">☰</button>
+      <div id="nav-menu" class="hidden items-center gap-6 md:flex">
+        <a href="#features" data-open-features class="hover:text-ink">Features</a>
+        <a href="#how" class="hover:text-ink">How it works</a>
+        <a href="https://github.com/rcrvano/claude-box#readme" class="hover:text-ink">Docs</a>
+        <a href="https://github.com/rcrvano/claude-box" class="inline-flex items-center gap-1.5 text-ink hover:text-iris">★ GitHub <span data-stars></span></a>
+        <a href="#get-started" class="btn-primary btn-sm font-sans">Get started</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+
+    <!-- ═══ hero ═══ -->
+    <section class="section grid items-center gap-12 pb-10 pt-16 md:grid-cols-[1.02fr_1.1fr] md:gap-14 md:pt-[4.6rem]">
+      <div>
+        <div class="kicker flex items-center gap-2.5"><span class="dot dot-coral"></span> open source · self-hosted · MIT</div>
+        <h1 class="mt-4 font-display text-[clamp(2.5rem,5.4vw,3.9rem)] font-bold leading-[1.02] tracking-tightest">Run Claude Code<br>in a <span class="text-iris">box.</span></h1>
+        <p class="mt-5 max-w-[46ch] text-[18.5px] leading-relaxed text-slate">A Dockerized Claude Code you open in any browser. Let it run on <span class="font-semibold text-ink">auto</span> — it can't touch anything outside <span class="font-mono text-ink">/workspace</span>, and its traffic is proxied, so it can't break your machine or phone your code home.</p>
+        <div id="get-started" class="mt-7 flex flex-wrap items-center gap-3">
+          <button class="cmd" data-copy="claude-box --web" aria-label="Copy command"><span class="p">$</span> claude-box --web <span data-copy-icon>⧉</span></button>
+          <a href="https://github.com/rcrvano/claude-box" class="btn-ghost">★ Star on GitHub <span data-stars class="text-slate"></span></a>
+        </div>
+        <div class="mt-6 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[12.5px] text-slate">
+          <span><b class="text-ink">1</b> command to start</span>
+          <span><b class="text-ink">0</b> code leaves your machine</span>
+          <span>works on <b class="text-ink">any device</b></span>
+        </div>
+      </div>
+
+      <!-- signature: live session board -->
+      <div class="board" aria-hidden="true">
+        <div class="flex items-center gap-2 px-2 pb-3.5 pt-1 font-mono text-[12.5px] text-slate"><span class="font-semibold text-ink">launcher</span> · 4 sessions · auto-refresh 2s</div>
+        <div class="board-grid">
+          <div class="scard live">
+            <div class="top"><span class="nm">web-1</span> <span>claude-box</span> <span class="st"><i></i>live</span></div>
+            <pre><span class="t-m">$</span> npm test
+<span class="t-g">✓ 42 passing</span> <span class="cur cur-g"></span></pre>
+          </div>
+          <div class="scard work">
+            <div class="top"><span class="nm">docs</span> <span>/site</span> <span class="st"><i></i>claude</span></div>
+            <pre><span class="t-c">claude ▸</span> writing landing
+<span class="t-m">● editing index.html</span> <span class="cur"></span></pre>
+          </div>
+          <div class="scard wait">
+            <div class="top"><span class="nm">web-2</span> <span>/scratch</span> <span class="st"><i></i>waiting</span></div>
+            <pre><span class="t-y">Continue? (y/n)</span> <span class="cur cur-y"></span></pre>
+          </div>
+          <div class="scard stop">
+            <div class="top"><span class="nm">api</span> <span>/srv/api</span> <span class="st"><i></i>stopped</span></div>
+            <pre><span class="t-m">○ idle · resume anytime</span></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ trust strip ═══ -->
+    <div class="border-y border-line bg-panel">
+      <div class="section flex flex-wrap items-center justify-center gap-x-9 gap-y-3 py-4 font-mono text-[13px] text-slate">
+        <span>★ <b class="text-ink" data-stars>—</b> stars on GitHub</span>
+        <span>Built for <b class="text-ink">Claude Code</b></span>
+        <span><b class="text-ink">Docker</b> sandbox</span>
+        <span>Runs on <b class="text-ink">your machine</b></span>
+      </div>
+    </div>
+
+    <!-- ═══ automode — the headline feature ═══ -->
+    <section class="section pt-24">
+      <div class="grid items-center gap-10 rounded-[28px] border border-line bg-panel p-6 shadow-soft sm:p-8 md:grid-cols-2 md:gap-12 md:p-12" style="background:linear-gradient(180deg,#fff,#f6f6fc)">
+        <div class="reveal">
+          <div class="kicker">The whole point</div>
+          <h2 class="mt-3 font-display text-[clamp(1.8rem,3.4vw,2.5rem)] font-bold leading-[1.08] tracking-tighter">Let it run on auto.<br>The box has the keys.</h2>
+          <p class="mt-4 text-[17px] leading-relaxed text-slate">claude-box ships in <span class="font-semibold text-ink">auto mode</span> — Claude accepts its own edits and runs commands without stopping to ask. That's only comfortable because it's boxed: the worst it can reach is one folder, and it can't talk to anywhere you didn't allow.</p>
+          <ul class="mt-6 space-y-3 text-[15px]">
+            <li class="flex gap-3"><span class="text-live">can't break</span><span class="text-slate">— only <span class="font-mono text-ink">/workspace</span> is mounted; the rest of your disk is invisible.</span></li>
+            <li class="flex gap-3"><span class="text-live">can't steal</span><span class="text-slate">— all egress goes through a TLS proxy. No quiet exfiltration.</span></li>
+            <li class="flex gap-3"><span class="text-live">can't escape</span><span class="text-slate">— it's a Docker container, not your host shell.</span></li>
+          </ul>
+        </div>
+        <div class="window reveal" aria-hidden="true">
+          <div class="wbar"><i style="background:#ff5f56"></i><i style="background:#ffbd2e"></i><i style="background:#27c93f"></i><span class="url">claude-box · auto mode</span></div>
+          <pre><span class="t-c">claude ▸ (auto)</span> ship the landing page
+<span class="t-g">●</span> wrote site/index.html
+<span class="t-g">●</span> wrote site/styles.css
+<span class="t-g">●</span> ran  ./build &amp;&amp; tests <span class="t-g">✓</span>
+<span class="t-m">— no prompts; nothing left the box —</span>
+<span class="t-i">/workspace</span> rw   <span class="t-m">·</span>   <span class="t-i">host disk</span> <span style="color:#ff7a6b">hidden</span>
+<span class="t-i">egress</span> → proxy   <span class="t-m">·</span>   done <span class="t-g">🟢</span> <span class="cur"></span></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ containment boundary (FIG.1, from blueprint dir) ═══ -->
+    <section class="section pt-24">
+      <div class="head max-w-[58ch]">
+        <div class="kicker">Containment</div>
+        <h2 class="mt-3 font-display text-[clamp(1.7rem,3.2vw,2.3rem)] font-bold leading-tight tracking-tighter">Exactly what it needs. Nothing else.</h2>
+        <p class="mt-3 text-[17px] leading-relaxed text-slate">A map of what the agent can and can't reach once it's in the box.</p>
+      </div>
+      <div class="reveal relative mt-9 rounded-2xl border-[1.5px] border-line bg-panel/70 p-5 sm:p-8 md:p-10">
+        <span class="absolute -top-2.5 left-6 bg-paper px-2 font-mono text-[11px] uppercase tracking-[0.12em] text-slate">FIG. 1 — containment boundary</span>
+        <div class="machine">
+          <span class="lbl">your machine</span>
+          <div class="boxframe">
+            <span class="lbl">the box · docker</span>
+            <div class="grid gap-6 md:grid-cols-2">
+              <div>
+                <div class="mount"><span class="text-live">✓</span><span class="text-ink">/workspace</span><span class="note">mounted · rw</span></div>
+                <div class="mount"><span class="text-coral">✗</span><span class="text-ink">~/.ssh</span><span class="note">invisible</span></div>
+                <div class="mount"><span class="text-coral">✗</span><span class="text-ink">~/secrets</span><span class="note">invisible</span></div>
+                <div class="mount" style="border-bottom:0"><span class="text-coral">✗</span><span class="text-ink">/ (host root)</span><span class="note">invisible</span></div>
+              </div>
+              <div class="window" style="box-shadow:none" aria-hidden="true">
+                <pre class="!p-3.5 !text-[11.5px]"><span class="t-c">claude ▸</span> build the feature
+<span class="t-g">●</span> editing src/app.ts
+<span class="t-m">only /workspace reachable</span> <span class="cur"></span></pre>
+              </div>
+            </div>
+            <div class="egress">
+              <span class="node">claude</span><span class="font-semibold text-ink">─▶</span><span class="node proxy">TLS proxy</span><span class="font-semibold text-ink">─▶</span><span class="node">Anthropic</span>
+              <span class="ml-auto">all egress routed · nothing direct</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ features as a list (3 main + expand) ═══ -->
+    <section id="features" class="section pt-24">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div class="head max-w-[52ch]">
+          <div class="kicker">What's in the box</div>
+          <h2 class="mt-3 font-display text-[clamp(1.7rem,3.2vw,2.3rem)] font-bold leading-tight tracking-tighter">Batteries included.</h2>
+          <p class="mt-3 text-[17px] leading-relaxed text-slate">Everything wired up on first run — auth, proxy, MCP servers, plugins, notifications.</p>
+        </div>
+        <a href="https://github.com/rcrvano/claude-box#readme" class="btn-ghost btn-sm">Read the docs →</a>
+      </div>
+
+      <div class="mt-10 border-t border-line">
+        <!-- three highlighted -->
+        <div class="spec reveal"><span class="id">01</span><h3>Sandboxed in Docker</h3><p>Claude Code runs in a container with only <code>/workspace</code> bind-mounted. The rest of your filesystem is never exposed.</p></div>
+        <div class="spec reveal"><span class="id">02</span><h3>Auto mode, without the worry</h3><p>Ships with <code>defaultMode: auto</code> so Claude accepts its own edits and commands — safe to leave running because of the box around it.</p></div>
+        <div class="spec reveal"><span class="id">03</span><h3>Live session launcher</h3><p>Every session on one page, grouped by folder, with auto-refreshing colored terminal snapshots — see what's working, done, or waiting.</p></div>
+
+        <!-- the rest (expandable) -->
+        <div class="more-rows" data-more>
+          <div class="spec"><span class="id">04</span><h3>Web terminal, any device</h3><p>Claude Code over ttyd in the browser. tmux-backed sessions survive a closed tab or reboot; each one is deep-linkable.</p></div>
+          <div class="spec"><span class="id">05</span><h3>Open it from your phone</h3><p><code>claude-box --web --tunnel</code> publishes the terminal over a public HTTPS URL — cloudflared by default (no account needed), ngrok optional. Drop in from your phone, anywhere.</p></div>
+          <div class="spec"><span class="id">06</span><h3>It taps your shoulder</h3><p>Browser notifications and a tab-title marker the moment a run finishes 🟢 or needs your input 🟡.</p></div>
+          <div class="spec"><span class="id">07</span><h3>VS Code in the browser</h3><p><code>claude-box --vscode</code> runs code-server on <code>/workspace</code> with the Claude Code extension installed automatically.</p></div>
+          <div class="spec"><span class="id">08</span><h3>Proxied egress</h3><p>Claude → Anthropic traffic is routed through a TLS proxy; internal targets bypass it via <code>NO_PROXY</code>.</p></div>
+          <div class="spec"><span class="id">09</span><h3>MCP servers, pre-seeded</h3><p>GitHub, Atlassian, Sentry, context7, Kubernetes, Figma, Playwright and Grafana seeded into user scope on start.</p></div>
+          <div class="spec"><span class="id">10</span><h3>Plugins &amp; config carried</h3><p>The superpowers plugin, your <code>settings.json</code>, theme and git identity ride along with the repo and apply on clone.</p></div>
+        </div>
+      </div>
+
+      <button id="see-all-features" class="btn-ghost btn-sm mt-7" aria-expanded="false" aria-controls="features">
+        <span data-more-label>See all features</span>
+        <span data-more-icon>↓</span>
+      </button>
+    </section>
+
+    <!-- ═══ web terminal deep-dive ═══ -->
+    <section class="section grid items-center gap-14 pt-24 md:grid-cols-2">
+      <div class="reveal">
+        <div class="kicker">Web terminal</div>
+        <h2 class="mt-3 font-display text-[clamp(1.7rem,3.2vw,2.3rem)] font-bold leading-tight tracking-tighter">Your terminal, in any browser.</h2>
+        <p class="mt-4 text-[17px] leading-relaxed text-slate">Open Claude Code over ttyd from a laptop, tablet, or phone. Sessions live in tmux, so they survive a closed tab or a reboot — and every one is deep-linkable, so a bookmarked URL drops you straight back in.</p>
+        <p class="mt-3 text-[15px] leading-relaxed text-slate">Need it off your LAN? <span class="font-mono text-ink">claude-box --web --tunnel</span> publishes a public HTTPS address (cloudflared by default, ngrok optional) — check on a run from your phone while you're out.</p>
+        <div class="mt-6 flex flex-wrap gap-2.5 font-mono text-[12px] text-slate">
+          <span class="rounded-full border border-line bg-panel px-3 py-1">laptop</span>
+          <span class="rounded-full border border-line bg-panel px-3 py-1">tablet</span>
+          <span class="rounded-full border border-line bg-panel px-3 py-1">phone</span>
+          <span class="rounded-full border border-line bg-panel px-3 py-1">deep-linkable</span>
+        </div>
+      </div>
+      <div class="window reveal" aria-hidden="true">
+        <div class="wbar"><i style="background:#ff5f56"></i><i style="background:#ffbd2e"></i><i style="background:#27c93f"></i><span class="url">https://localhost:8443/term/?id=web-1</span></div>
+        <pre><span class="t-c">claude ▸</span> refactor the launcher preview cache
+<span class="t-g">●</span> editing scripts/web-preview.sh
+<span class="t-i">▸ egress proxied · only /workspace mounted</span>
+<span class="t-m">done · 🟢</span> <span class="cur"></span></pre>
+      </div>
+    </section>
+
+    <!-- ═══ how it works ═══ -->
+    <section id="how" class="section pt-24">
+      <div class="mx-auto max-w-[40ch] text-center">
+        <div class="kicker">Three steps</div>
+        <h2 class="mt-3 font-display text-[clamp(1.7rem,3.2vw,2.3rem)] font-bold leading-tight tracking-tighter">Up and running in a minute.</h2>
+      </div>
+      <div class="mt-10 grid gap-4 md:grid-cols-3">
+        <div class="card"><div class="step n">01</div><h3 class="mt-2 font-display text-[17px] font-bold">Clone the repo</h3><pre class="mt-3.5 overflow-x-auto rounded-[10px] bg-screen p-3.5 font-mono text-xs text-screen-txt"><span class="t-i">git</span> clone github.com/
+  rcrvano/claude-box</pre></div>
+        <div class="card"><div class="step n">02</div><h3 class="mt-2 font-display text-[17px] font-bold">Launch the box</h3><pre class="mt-3.5 overflow-x-auto rounded-[10px] bg-screen p-3.5 font-mono text-xs text-screen-txt"><span class="t-i">$</span> claude-box --web</pre></div>
+        <div class="card"><div class="step n">03</div><h3 class="mt-2 font-display text-[17px] font-bold">Open in your browser</h3><pre class="mt-3.5 overflow-x-auto rounded-[10px] bg-screen p-3.5 font-mono text-xs text-screen-txt">https://localhost:8443</pre></div>
+      </div>
+    </section>
+
+    <!-- ═══ self-host / privacy ═══ -->
+    <section class="section pt-24">
+      <div class="card text-center">
+        <h2 class="mx-auto max-w-[24ch] font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold leading-tight tracking-tighter">Runs on your machine. Nothing leaves the box.</h2>
+        <p class="mx-auto mt-4 max-w-[58ch] text-[17px] leading-relaxed text-slate">Your code and keys stay local. Egress is proxied, one folder is mounted, and the whole thing is open source under MIT. Self-host it, audit it, change it.</p>
+        <div class="mt-7 flex flex-wrap justify-center gap-2.5 font-mono text-[13px] text-slate">
+          <span class="rounded-full border border-line px-3.5 py-1.5">🔒 Egress proxied</span>
+          <span class="rounded-full border border-line px-3.5 py-1.5">📁 One folder mounted</span>
+          <span class="rounded-full border border-line px-3.5 py-1.5">🐳 Docker isolated</span>
+          <span class="rounded-full border border-line px-3.5 py-1.5">⚖ MIT licensed</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ contributors ═══ -->
+    <section class="section pt-16 text-center">
+      <div class="kicker">Built in the open</div>
+      <div data-contributors class="mt-4 flex min-h-[48px] items-center justify-center"></div>
+      <a href="https://github.com/rcrvano/claude-box" class="mt-3 inline-block text-sm font-semibold text-iris hover:underline">Contribute on GitHub →</a>
+    </section>
+
+    <!-- ═══ final CTA ═══ -->
+    <section class="mt-24 border-t border-line" style="background:linear-gradient(180deg,#fff,#f4f4fb)">
+      <div class="section py-20 text-center">
+        <div class="kicker">Ready</div>
+        <h2 class="mt-3 font-display text-[clamp(2rem,4vw,2.9rem)] font-bold tracking-tightest">Box your Claude.</h2>
+        <p class="mx-auto mt-3 max-w-[42ch] text-[17px] text-slate">Isolated, durable, reachable from anywhere. One command to start.</p>
+        <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
+          <button class="cmd" data-copy="claude-box --web" aria-label="Copy command"><span class="p">$</span> claude-box --web <span data-copy-icon>⧉</span></button>
+          <a href="https://github.com/rcrvano/claude-box" class="btn-ghost">★ Star on GitHub <span data-stars class="text-slate"></span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ═══ footer ═══ -->
+  <footer class="border-t border-line bg-panel">
+    <div class="section grid grid-cols-2 gap-8 py-12 sm:grid-cols-4">
+      <div class="col-span-2 sm:col-span-1">
+        <div class="brand">claude-<b>box</b></div>
+        <p class="mt-2 max-w-[28ch] text-sm text-slate">Claude Code, boxed. Built in the open under MIT.</p>
+      </div>
+      <div>
+        <div class="mb-3 font-mono text-[11px] uppercase tracking-wider text-slate">Product</div>
+        <ul class="space-y-2 text-sm text-slate">
+          <li><a href="#features" data-open-features class="hover:text-ink">Features</a></li>
+          <li><a href="#how" class="hover:text-ink">How it works</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="mb-3 font-mono text-[11px] uppercase tracking-wider text-slate">Open source</div>
+        <ul class="space-y-2 text-sm text-slate">
+          <li><a href="https://github.com/rcrvano/claude-box" class="hover:text-ink">GitHub</a></li>
+          <li><a href="https://github.com/rcrvano/claude-box#readme" class="hover:text-ink">Docs</a></li>
+          <li><a href="https://github.com/rcrvano/claude-box/blob/main/LICENSE" class="hover:text-ink">License (MIT)</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="mb-3 font-mono text-[11px] uppercase tracking-wider text-slate">Commands</div>
+        <ul class="space-y-2 font-mono text-[13px] text-slate">
+          <li>claude-box --web</li>
+          <li>… --web --tunnel</li>
+          <li>… --vscode</li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/main.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- box in Claude's brand color -->
+  <rect x="4" y="7" width="24" height="21" rx="3" fill="#D97757"/>
+  <!-- lid seam -->
+  <path d="M4 13 H28" stroke="#B85C3E" stroke-width="1.6"/>
+  <!-- Claude burst on the front face -->
+  <g stroke="#F7F2EC" stroke-width="2.4" stroke-linecap="round">
+    <path d="M16 14.5 V25.5"/>
+    <path d="M10.8 20 H21.2"/>
+    <path d="M12.5 16.5 L19.5 23.5"/>
+    <path d="M19.5 16.5 L12.5 23.5"/>
+  </g>
+</svg>

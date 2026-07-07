@@ -1,0 +1,381 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>claude-box · sessions</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%20role%3D%22img%22%20aria-label%3D%22claude-box%22%3E%20%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%230E1116%22%2F%3E%20%3Cg%20fill%3D%22none%22%20stroke%3D%22%235B5BD6%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%20%3Cpath%20d%3D%22M19%2014%20H13%20V50%20H19%22%2F%3E%20%3Cpath%20d%3D%22M45%2014%20H51%20V50%20H45%22%2F%3E%20%3C%2Fg%3E%20%3Cg%20transform%3D%22translate(20%2020)%20scale(0.024)%22%3E%20%3Cpath%20fill%3D%22%23D97757%22%20d%3D%22M474.0000305%2C1000L449%2C981l-14.0000305-31.000061L449%2C888l16-80%0D%20l13-63.999939L490%2C665l7.0000305-26L496%2C637l-4.9999695%2C1L431%2C720l-91%2C123l-72%2C76l-17%2C7.000061L221%2C911l3-28l17-24.000061%0D%20l99-126.9998779L400.0000305%2C653L439%2C608l-1-6h-2l-264%2C172L125%2C780l-21-19l3-31l10-10l79-55l197-110l3-10l-3-5h-9.9999695%0D%20l-33.000061-2L238%2C535l-97-4l-95-5l-24-5L0%2C491.0000305L2%2C476l20-12.9999695L51%2C465l63%2C5l94.9999847%2C6L278%2C480.0000305l102%2C11h16%0D%20L398%2C484l-5-3.9999695L389.0000305%2C476L290%2C410l-106-70l-56-41l-30-21l-15-19l-6-42l27-30l37%2C3l9%2C1.9999847L187%2C221l79%2C61l104%2C77%0D%20l15%2C12l7-4.0000305V364l-7-11l-56-102l-60-104l-27-43l-7-26c-2.6666565-9-4-19-4-30.0000038L262%2C6.000042L279%2C0l42%2C6.000042%0D%20l17.0000305%2C15L364%2C80l41%2C93l65%2C126l19%2C38l10%2C34l3.9999695%2C11H510v-6l5-72l10-87l10-112l3-32l16-37.999958l31-20l24%2C11%0D%20l20%2C28.9999619L626%2C73l-11%2C77l-24%2C121l-15%2C82h9l10-11l41-54l69-86l30-34l36-38l23-18h43l31%2C47l-14%2C49l-44%2C56l-37%2C47l-53%2C71%0D%20l-32.000061%2C57L691%2C443h7.000061L817%2C417.0000305l64.999939-11L958%2C393l35%2C16l4%2C16l-14.000061%2C34L901%2C479l-96%2C19l-143%2C34l-2%2C1l2%2C3%0D%20l64%2C6l28%2C2h68l126.000061%2C9L981%2C575l19%2C26l-3%2C21l-51%2C25l-68-16l-160-38l-54-13h-8v4l46%2C45l83%2C75l105%2C97.000061l5%2C23.9998779%0D%20L881.999939%2C845L868%2C843l-92-70l-36-31l-80-66.999939h-5V682l18%2C27.000061L771%2C856l5%2C45l-7%2C13.999939L743%2C924l-27-5l-58-80l-59-91%0D%20l-48-81l-5%2C4l-29%2C302l-13%2C15L474.0000305%2C1000z%22%2F%3E%20%3C%2Fg%3E%20%3C%2Fsvg%3E">
+<!-- Self-contained: fonts below are inlined as base64 by build-launcher.js at image build
+     time (the web sidecar serves this as a single file — no separate /fonts requests). -->
+<style>
+  @font-face{font-family:Inter;font-weight:400;font-display:swap;src:url(fonts/inter-400.woff2) format("woff2")}
+  @font-face{font-family:Inter;font-weight:600;font-display:swap;src:url(fonts/inter-600.woff2) format("woff2")}
+  @font-face{font-family:'Space Grotesk';font-weight:700;font-display:swap;src:url(fonts/space-700.woff2) format("woff2")}
+  @font-face{font-family:'IBM Plex Mono';font-weight:400;font-display:swap;src:url(fonts/plex-400.woff2) format("woff2")}
+  @font-face{font-family:'IBM Plex Mono';font-weight:600;font-display:swap;src:url(fonts/plex-600.woff2) format("woff2")}
+
+  :root{
+    --paper:#f7f8fa; --panel:#fff; --ink:#0e1116; --slate:#5b6573;
+    --iris:#5b5bd6; --iris-d:#4848c7; --line:#e6e9ef;
+    --screen:#0e1116; --screen-line:#262b36; --screen-txt:#c9cfda;
+    --screen-nm:#e7eaf0; --screen-meta:#8a93a2;
+    --live:#16a34a; --wait:#e0a100; --work:#d97757; --stop:#9aa7b8;
+    --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --display:'Space Grotesk',system-ui,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,"DejaVu Sans Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);
+       -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  .wrap{max-width:1040px;margin:0 auto;padding:26px 22px 60px}
+
+  /* header */
+  .brand{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-size:19px;font-weight:700;letter-spacing:-.025em;color:var(--ink)}
+  .brand-mark{height:22px;width:22px;flex-shrink:0}
+  .brand b{font-family:var(--mono);font-weight:600;color:var(--iris)}
+  .boardhead{margin-top:6px;display:flex;align-items:center;gap:8px;
+             font-family:var(--mono);font-size:12.5px;color:var(--slate)}
+  .livedot{width:8px;height:8px;border-radius:50%;background:var(--live);
+           box-shadow:0 0 0 3px rgba(22,163,74,.15);flex:0 0 auto}
+
+  /* search + new */
+  .search{display:flex;align-items:center;gap:12px;margin:20px 0 6px}
+  .field{flex:1;min-width:0;padding:11px 13px;background:var(--panel);border:1px solid var(--line);
+         border-radius:11px;color:var(--ink);font:14px var(--sans)}
+  .field::placeholder{color:#9aa3b2}
+  .field:focus{outline:2px solid var(--iris);outline-offset:1px;border-color:transparent}
+  .tgl{color:var(--slate);font-size:13px;white-space:nowrap;cursor:pointer;user-select:none;
+       display:flex;align-items:center;gap:6px}
+  .tgl input{accent-color:var(--iris)}
+  .head{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .btn{padding:11px 17px;background:var(--iris);border:0;border-radius:11px;color:#fff;
+       font:600 14px var(--sans);cursor:pointer;transition:background .15s;white-space:nowrap}
+  .btn:hover{background:var(--iris-d)}
+
+  /* folder group + board grid */
+  .grp{margin:22px 0 9px;color:var(--iris);font-family:var(--mono);font-size:12px;font-weight:600;
+       overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .board-grid{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+  @media (max-width:720px){.board-grid{grid-template-columns:1fr}}
+
+  /* session card — the site's .scard */
+  .scard{position:relative;display:block;min-width:0;overflow:hidden;border:1px solid var(--screen-line);
+         border-radius:13px;background:var(--screen);text-decoration:none;color:inherit;
+         box-shadow:0 1px 2px rgba(16,17,22,.05);transition:border-color .15s,box-shadow .15s}
+  .scard:hover{border-color:#3a4150;box-shadow:0 10px 30px -18px rgba(40,44,80,.55)}
+  .scard:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--stop)}
+  .scard .top{display:flex;align-items:center;gap:8px;padding:9px 11px;
+              border-bottom:1px solid var(--screen-line);
+              font-family:var(--mono);font-size:11.5px;color:var(--screen-meta)}
+  .scard .top .nm{font-weight:600;color:var(--screen-nm);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .scard .top .when{color:var(--screen-meta);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .scard .st{margin-left:auto;display:inline-flex;align-items:center;gap:6px;flex:0 0 auto}
+  .scard .st i{width:7px;height:7px;border-radius:50%;display:inline-block;background:currentColor}
+  .scard .del{flex:0 0 auto;background:transparent;border:0;color:#6b7382;font-size:13px;line-height:1;
+              padding:2px 3px;cursor:pointer;opacity:.55;transition:opacity .15s,color .15s}
+  .scard .del:hover{opacity:1;color:var(--work)}
+  .scard pre.prev{margin:0;padding:9px 11px;font-family:var(--mono);font-size:11px;line-height:1.5;
+                  color:var(--screen-txt);white-space:pre;overflow:hidden;max-height:150px}
+  .scard pre.prev.dead{opacity:.55}
+  .scard .pmeta{padding:0 11px 8px;font-family:var(--mono);font-size:10.5px;color:#6b7382}
+
+  .scard.live:before{background:var(--live)} .scard.live .st{color:var(--live)}
+  .scard.wait:before{background:var(--wait)} .scard.wait .st{color:var(--wait)}
+  .scard.work:before{background:var(--work)} .scard.work .st{color:var(--work)}
+  .scard.stop:before{background:var(--stop)} .scard.stop .st{color:var(--stop)}
+
+  /* search results */
+  .result{display:block;padding:11px 13px;margin:9px 0;background:var(--panel);border:1px solid var(--line);
+          border-radius:11px;text-decoration:none;color:inherit}
+  .result:hover{border-color:var(--iris)}
+  .result .name{font-weight:600;color:var(--ink);font-size:14px}
+  .result .meta{color:var(--slate);font-size:12px;font-weight:400}
+  .result .snip{color:var(--slate);font-size:13px;margin-top:4px;white-space:normal;word-break:break-word;font-family:var(--mono)}
+  mark{background:var(--iris);color:#fff;border-radius:3px;padding:0 2px}
+
+  .count-head{margin:18px 0 4px;color:var(--iris);font-family:var(--mono);font-size:12px;font-weight:600}
+  .empty{color:var(--slate);padding:18px 0}
+  .hidden{display:none}
+
+  /* large frame on hover */
+  #zoom{position:fixed;z-index:50;display:none;left:0;top:0;max-width:88vw;max-height:84vh;
+        overflow:hidden;pointer-events:none;background:var(--screen);border:1px solid var(--iris);
+        border-radius:10px;padding:11px;font-family:var(--mono);font-size:11px;line-height:1.3;
+        color:var(--screen-txt);white-space:pre;box-shadow:0 24px 60px -18px rgba(20,20,40,.55)}
+</style></head><body><div id="zoom"></div><div class="wrap">
+
+<header class="head">
+  <div>
+    <div class="brand"><svg class="brand-mark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="claude-box"> <g fill="none" stroke="#5B5BD6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"> <path d="M19 14 H13 V50 H19"/> <path d="M45 14 H51 V50 H45"/> </g> <g transform="translate(20 20) scale(0.024)"> <path fill="#D97757" d="M474.0000305,1000L449,981l-14.0000305-31.000061L449,888l16-80 l13-63.999939L490,665l7.0000305-26L496,637l-4.9999695,1L431,720l-91,123l-72,76l-17,7.000061L221,911l3-28l17-24.000061 l99-126.9998779L400.0000305,653L439,608l-1-6h-2l-264,172L125,780l-21-19l3-31l10-10l79-55l197-110l3-10l-3-5h-9.9999695 l-33.000061-2L238,535l-97-4l-95-5l-24-5L0,491.0000305L2,476l20-12.9999695L51,465l63,5l94.9999847,6L278,480.0000305l102,11h16 L398,484l-5-3.9999695L389.0000305,476L290,410l-106-70l-56-41l-30-21l-15-19l-6-42l27-30l37,3l9,1.9999847L187,221l79,61l104,77 l15,12l7-4.0000305V364l-7-11l-56-102l-60-104l-27-43l-7-26c-2.6666565-9-4-19-4-30.0000038L262,6.000042L279,0l42,6.000042 l17.0000305,15L364,80l41,93l65,126l19,38l10,34l3.9999695,11H510v-6l5-72l10-87l10-112l3-32l16-37.999958l31-20l24,11 l20,28.9999619L626,73l-11,77l-24,121l-15,82h9l10-11l41-54l69-86l30-34l36-38l23-18h43l31,47l-14,49l-44,56l-37,47l-53,71 l-32.000061,57L691,443h7.000061L817,417.0000305l64.999939-11L958,393l35,16l4,16l-14.000061,34L901,479l-96,19l-143,34l-2,1l2,3 l64,6l28,2h68l126.000061,9L981,575l19,26l-3,21l-51,25l-68-16l-160-38l-54-13h-8v4l46,45l83,75l105,97.000061l5,23.9998779 L881.999939,845L868,843l-92-70l-36-31l-80-66.999939h-5V682l18,27.000061L771,856l5,45l-7,13.999939L743,924l-27-5l-58-80l-59-91 l-48-81l-5,4l-29,302l-13,15L474.0000305,1000z"/> </g> </svg>claude-<b>box</b></div>
+    <div class="boardhead"><span class="livedot"></span> launcher · <span id="scount">…</span> sessions · auto-refresh 2s</div>
+  </div>
+  <button id="newbtn" class="btn">New session</button>
+</header>
+
+<div class="search">
+  <input id="q" class="field" placeholder="search session history…" autocomplete="off">
+  <label class="tgl"><input type="checkbox" id="scope"> in Claude's replies</label>
+</div>
+<div id="results" class="hidden"></div>
+<div id="list"><div class="empty">loading…</div></div>
+
+<script>
+function fmt(ts){ if(!ts) return ''; var d=Math.floor(Date.now()/1000)-ts;
+  if(d<60)return 'just now'; if(d<3600)return Math.floor(d/60)+' min ago';
+  if(d<86400)return Math.floor(d/3600)+' h ago'; return Math.floor(d/86400)+' d ago'; }
+// 16-color palette (ANSI 30-37 / 90-97)
+var ANSI16=['#000','#c00','#0c0','#cc0','#36f','#c0c','#0cc','#ccc',
+            '#666','#f66','#6f6','#ff6','#69f','#f6f','#6ff','#fff'];
+function esc(s){return s.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+function col256(n){ // xterm 256 -> #rgb
+  if(n<16) return ANSI16[n];
+  if(n>=232) {var v=8+(n-232)*10; return 'rgb('+v+','+v+','+v+')';}
+  n-=16; var r=Math.floor(n/36),g=Math.floor((n%36)/6),b=n%6;
+  var f=function(x){return x?55+x*40:0;}; return 'rgb('+f(r)+','+f(g)+','+f(b)+')';
+}
+// ANSI (SGR) -> HTML with spans. Unknown escapes are dropped.
+function ansiToHtml(str){
+  if(!str) return '';
+  str=str.replace(/\x1b\][^\x07]*\x07/g,'');            // drop OSC
+  var out='',fg=null,bg=null,bold=false,open=false;
+  function span(){ if(open) out+='</span>'; var s='';
+    if(fg) s+='color:'+fg+';'; if(bg) s+='background:'+bg+';'; if(bold) s+='font-weight:600;';
+    if(s){ out+='<span style="'+s+'">'; open=true; } else open=false;
+  }
+  var re=/\x1b\[([0-9;]*)m|([^\x1b]+)|(\x1b\[[0-9;]*[A-Za-z])/g,m;
+  while((m=re.exec(str))){
+    if(m[2]!=null){ out+=esc(m[2]); continue; }            // plain text
+    if(m[3]!=null) continue;                                // other CSI — ignore
+    var codes=(m[1]===''?'0':m[1]).split(';').map(Number);
+    for(var i=0;i<codes.length;i++){var c=codes[i];
+      if(c===0){fg=bg=null;bold=false;}
+      else if(c===1){bold=true;} else if(c===2||c===22){bold=false;}
+      else if(c===39){fg=null;} else if(c===49){bg=null;}
+      else if(c>=30&&c<=37){fg=ANSI16[c-30];} else if(c>=90&&c<=97){fg=ANSI16[c-90+8];}
+      else if(c>=40&&c<=47){bg=ANSI16[c-40];} else if(c>=100&&c<=107){bg=ANSI16[c-100+8];}
+      else if(c===38||c===48){var dst=(c===38);i++;
+        if(codes[i]===5){i++; var v=col256(codes[i]); if(dst)fg=v;else bg=v;}
+        else if(codes[i]===2){var rr=codes[i+1],gg=codes[i+2],bb=codes[i+3];i+=3;
+          var v2='rgb('+rr+','+gg+','+bb+')'; if(dst)fg=v2;else bg=v2;}
+      }
+    }
+    span();
+  }
+  if(open) out+='</span>';
+  return out;
+}
+
+// --- session state -> card class (matches the site's scard variants) ---
+//   !live           -> stop  (slate)   ·  live + waiting -> wait (amber)
+//   live + working  -> work  (coral)   ·  live + done/—  -> live (green)
+function statusClass(s){ if(!s.live) return 'stop'; if(s.state==='waiting') return 'wait';
+  if(s.state==='working') return 'work'; return 'live'; }
+var STLABEL={live:'live',wait:'waiting',work:'claude',stop:'stopped'};
+
+// Card label: prefer Claude's own session title (s.title — the same string shown in the
+// browser tab), falling back to the tmux session name (web-N) or the token.
+function dispName(s){ var t=(s.title||'').trim(); return t || s.name || s.token; }
+
+// Hide ephemeral scratch sessions from the board: /tmp/claude-scratch* are throwaway.
+function boardRows(rows){ return rows.filter(function(s){ return !/^\/tmp\/claude-scratch/.test(s.cwd||''); }); }
+
+var PREVCACHE={};    // token -> {html, live, ts}  (so frequent re-renders don't flicker/refetch)
+var TOKEN2CARD={};   // token -> card entry
+var CARDS=[];        // [{token, a, cls, prev, st, when, pmeta, live, state}]
+var SIG='';          // membership signature of the current board
+
+function loadPreview(token){
+  fetch('preview?id='+encodeURIComponent(token)).then(function(r){return r.ok?r.json():null;})
+    .then(function(p){
+      if(!p) return;
+      var html = p.ansi ? ansiToHtml(p.ansi) : '<span style="color:#6b7382">no preview</span>';
+      PREVCACHE[token]={html:html, live:p.live, ts:p.ts};
+      var c=TOKEN2CARD[token]; if(!c) return;
+      c.prev.classList.toggle('dead', !p.live);
+      c.prev.innerHTML=html;
+      c.pmeta.textContent = p.live ? '' : ('stopped · frame '+fmt(p.ts));
+    }).catch(function(){});
+}
+
+var zoom=document.getElementById('zoom'); var hoverToken=null;
+// Hover-zoom is bound to the terminal body only (not the .top header), so the header —
+// name/time/status and the ✕ delete button — stays freely clickable. `card` is used for
+// positioning the zoom beside the whole card; `hot` is the region that triggers it.
+function bindHover(card, hot, token){
+  hot.addEventListener('mouseenter', function(){
+    hoverToken=token;
+    fetch('preview?id='+encodeURIComponent(token)+'&full=1').then(function(r){return r.ok?r.json():null;})
+      .then(function(p){
+        if(hoverToken!==token) return;                       // cursor already left -> don't show
+        if(!p||!p.ansi){ zoom.style.display='none'; return; }
+        zoom.innerHTML=ansiToHtml(p.ansi); zoom.style.display='block';
+        var rc=card.getBoundingClientRect(), w=zoom.offsetWidth, h=zoom.offsetHeight;
+        var x=rc.right+12;                                    // by default to the right of the card
+        if(x+w>window.innerWidth-12) x=rc.left-12-w;          // doesn't fit on the right -> on the left
+        if(x<12) x=Math.max(12, window.innerWidth-w-12);      // tight on the left too -> to the right edge
+        zoom.style.left=x+'px';
+        zoom.style.top=Math.max(12, Math.min(rc.top, window.innerHeight-h-12))+'px';
+      }).catch(function(){});
+  });
+  hot.addEventListener('mouseleave', function(){ hoverToken=null; zoom.style.display='none'; });
+}
+
+function updateCount(n){ document.getElementById('scount').textContent=n; }
+
+// Full (re)build of the board. Runs on first load and whenever the set of sessions
+// changes. Previews come from PREVCACHE so a rebuild never flashes "loading…" for
+// sessions we've already snapshotted.
+function render(rows){
+  var el=document.getElementById('list'); CARDS=[]; TOKEN2CARD={};
+  SIG=rows.map(function(s){return s.token;}).slice().sort().join(',');
+  updateCount(rows.length);
+  if(!rows.length){ el.innerHTML='<div class="empty">no sessions yet — create a new one below</div>'; return; }
+  // group by cwd; folders sorted by descending max lastActivity
+  var groups={}, order=[];
+  rows.forEach(function(s){ var k=s.cwd||'(no folder)';
+    if(!groups[k]){ groups[k]=[]; order.push(k); } groups[k].push(s); });
+  order.sort(function(a,b){
+    var ma=Math.max.apply(null,groups[a].map(function(s){return s.lastActivity||0;}));
+    var mb=Math.max.apply(null,groups[b].map(function(s){return s.lastActivity||0;}));
+    return mb-ma;
+  });
+  el.innerHTML='';
+  order.forEach(function(k){
+    var h=document.createElement('div'); h.className='grp'; h.textContent=k; el.appendChild(h);
+    var grid=document.createElement('div'); grid.className='board-grid'; el.appendChild(grid);
+    groups[k].forEach(function(s){
+      var cls=statusClass(s);
+      var a=document.createElement('a'); a.className='scard '+cls; a.href='term/?id='+encodeURIComponent(s.token);
+      a.innerHTML='<div class="top"><span class="nm"></span><span class="when"></span>'+
+        '<span class="st"><i></i>'+STLABEL[cls]+'</span>'+
+        '<button class="del" type="button" title="Delete session" aria-label="Delete session">✕</button></div>'+
+        '<pre class="prev">loading…</pre><div class="pmeta"></div>';
+      var nmEl=a.querySelector('.nm'); var dn=dispName(s); nmEl.textContent=dn; nmEl.title=dn;
+      a.querySelector('.when').textContent=fmt(s.lastActivity);
+      var entry={token:s.token, a:a, cls:cls, nm:nmEl, dname:dn,
+        prev:a.querySelector('.prev'), st:a.querySelector('.st'),
+        when:a.querySelector('.when'), pmeta:a.querySelector('.pmeta'),
+        live:s.live, state:s.state};
+      CARDS.push(entry); TOKEN2CARD[s.token]=entry;
+      a.querySelector('.del').addEventListener('click', function(e){
+        e.preventDefault(); e.stopPropagation();   // don't open the session when clicking ✕
+        if(!confirm('Delete session "'+dn+'"?'+(s.live?' It is running — it will be stopped.':''))) return;
+        fetch('delete?id='+encodeURIComponent(s.token),{method:'POST'})
+          .then(function(r){return r.ok?r.json():null;})
+          .then(function(p){ if(p&&p.ok){
+              if(a.parentNode) a.parentNode.removeChild(a);
+              CARDS=CARDS.filter(function(c){return c.token!==s.token;});
+              delete TOKEN2CARD[s.token]; delete PREVCACHE[s.token]; SIG='';   // force a clean rebuild next tick
+            } else alert('Failed to delete session'); })
+          .catch(function(){ alert('Failed to delete session'); });
+      });
+      grid.appendChild(a);
+      bindHover(a, entry.prev, s.token);
+      var cached=PREVCACHE[s.token];
+      if(cached){ entry.prev.classList.toggle('dead', !cached.live); entry.prev.innerHTML=cached.html;
+        entry.pmeta.textContent = cached.live ? '' : ('stopped · frame '+fmt(cached.ts)); }
+      else loadPreview(s.token);
+    });
+  });
+}
+
+// Cheap in-place update when the set of sessions is unchanged: only status colors,
+// labels and timestamps move. Avoids rebuilding the DOM (keeps hover/zoom stable).
+function updateStatuses(rows){
+  var by={}; rows.forEach(function(s){ by[s.token]=s; });
+  CARDS.forEach(function(c){
+    var s=by[c.token]; if(!s) return;
+    var cls=statusClass(s);
+    if(cls!==c.cls){ c.a.className='scard '+cls; c.st.innerHTML='<i></i>'+STLABEL[cls]; c.cls=cls; }
+    var dn=dispName(s); if(dn!==c.dname){ c.nm.textContent=dn; c.nm.title=dn; c.dname=dn; }
+    c.when.textContent=fmt(s.lastActivity);
+    c.live=s.live; c.state=s.state;
+  });
+}
+
+function statusTick(){
+  if(document.hidden) return;
+  fetch('sessions').then(function(r){return r.ok?r.json():[];}).then(function(rows){
+    rows=boardRows(rows);
+    updateCount(rows.length);
+    var sig=rows.map(function(s){return s.token;}).slice().sort().join(',');
+    if(sig!==SIG) render(rows); else updateStatuses(rows);
+    notifyTick(rows);
+  }).catch(function(){ /* keep the current view on a transient failure */ });
+}
+function snapshotTick(){ if(document.hidden) return; CARDS.forEach(function(c){ loadPreview(c.token); }); }
+
+function loadSessions(){
+  fetch('sessions').then(function(r){return r.json();}).then(function(rows){ render(boardRows(rows)); })
+    .catch(function(){ document.getElementById('list').innerHTML='<div class="empty">failed to load the list</div>'; });
+}
+loadSessions();
+setInterval(statusTick, 2000);      // statuses / membership — cheap
+setInterval(snapshotTick, 10000);   // terminal frames — heavier
+
+document.getElementById('newbtn').addEventListener('click',function(){
+  location.href='term/?new=';   // Claude names the session via its own title; no manual name
+});
+
+// --- search across the history of all sessions ---
+(function(){
+  var qEl=document.getElementById('q');
+  var scopeEl=document.getElementById('scope');
+  var resEl=document.getElementById('results');
+  var listEl=document.getElementById('list');
+  var seq=0, tmr=null;
+  function hl(text,q){                                   // highlight matches (unicode via toLowerCase)
+    var t=text||'', lc=t.toLowerCase(), lq=q.toLowerCase(), out='', i=0, idx;
+    if(!lq) return esc(t);
+    while((idx=lc.indexOf(lq,i))>=0){
+      out+=esc(t.slice(i,idx))+'<mark>'+esc(t.slice(idx,idx+q.length))+'</mark>';
+      i=idx+q.length;
+    }
+    return out+esc(t.slice(i));
+  }
+  function when(ts){ if(!ts) return ''; var d=new Date(ts); return isNaN(d)?'':d.toLocaleString(); }
+  function renderResults(rows,q){
+    if(!rows.length){ resEl.innerHTML='<div class="empty">nothing found</div>'; return; }
+    var h='<div class="count-head">Found: '+rows.length+'</div>';
+    rows.forEach(function(s){
+      h+='<a class="result" href="term/?id='+encodeURIComponent(s.token)+'">'+
+         '<div class="name">'+esc(s.name||s.token)+
+         ' <span class="meta">'+esc(when(s.timestamp))+(s.type==='assistant'?' · Claude':'')+'</span></div>'+
+         '<div class="snip">'+hl(s.snippet||'',q)+'</div></a>';
+    });
+    resEl.innerHTML=h;
+  }
+  function doSearch(){
+    var q=qEl.value.trim();
+    if(q.length<2){ resEl.classList.add('hidden'); resEl.innerHTML=''; listEl.classList.remove('hidden'); return; }
+    listEl.classList.add('hidden'); resEl.classList.remove('hidden');
+    var my=++seq, scope=scopeEl.checked?'all':'prompts';   // race protection via seq
+    fetch('search?q='+encodeURIComponent(q)+'&scope='+scope)
+      .then(function(r){ if(!r.ok) throw 0; return r.json(); })   // 500/timeout -> error branch, not "nothing found"
+      .then(function(rows){ if(my===seq) renderResults(rows,q); })
+      .catch(function(){ if(my===seq) resEl.innerHTML='<div class="empty">search error</div>'; });
+  }
+  qEl.addEventListener('input', function(){ clearTimeout(tmr); tmr=setTimeout(doSearch,350); });
+  scopeEl.addEventListener('change', function(){ if(qEl.value.trim().length>=2) doSearch(); });
+})();
+
+// --- notifications for ALL sessions (secure context): catch state changes ---
+(function(){
+  if(!window.Notification) return;
+  document.addEventListener('pointerdown', function once(){
+    try{ if(Notification.permission==='default') Notification.requestPermission(); }catch(e){}
+    document.removeEventListener('pointerdown', once);
+  });
+})();
+var NOTIFY_PREV={};       // token -> last state, for notification edge detection
+function notifyTick(rows){
+  if(!window.Notification || Notification.permission!=='granted') return;
+  rows.forEach(function(s){
+    var st=s.state, was=NOTIFY_PREV[s.token];
+    if(was!==undefined && st!==was && (st==='done'||st==='waiting')){
+      try{ var n=new Notification('claude-box',{
+          body:dispName(s)+': '+(st==='waiting'?'🟡 waiting for input':'🟢 done'), tag:'cb-'+s.token});
+        n.onclick=function(){ window.focus(); n.close(); };
+      }catch(e){}
+    }
+    NOTIFY_PREV[s.token]=st;
+  });
+}
+</script></div></body></html>

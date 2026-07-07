@@ -1,0 +1,47 @@
+services:
+  claude:
+    build: .
+    image: claude-box
+    labels:
+      - claude-box.role=session
+    network_mode: host        # reuse the host network (Tailscale) for DB access
+    stdin_open: true          # -i
+    tty: true                 # -t  (interactive claude console)
+    env_file:
+      - ./.env                # secrets + settings (token, proxy, PROJECT_DIR, GH_TOKEN)
+    volumes:
+      # working folder (shown as /workspace); the path is set in .env via PROJECT_DIR
+      - ${PROJECT_DIR}:/workspace
+      # the whole container home to the host: both ~/.claude (history) and ~/.claude.json (config/onboarding/resume)
+      - ./home:/home/node
+
+  web:
+    build: .
+    image: claude-box
+    labels:
+      - claude-box.role=web
+    init: true                # tini as PID1: forwards SIGTERM to the entrypoint + reaps zombies
+    stop_grace_period: 15s    # give Claude in tmux time to save before the container is torn down
+    network_mode: host        # ttyd port on the host loopback (see claude-web-serve)
+    env_file:
+      - ./.env                # the same secrets + WEB_TERMINAL_PORT / WEB_TERMINAL_PASSWORD
+    environment:
+      - WEB_TUNNEL            # the host passes =1 when running `claude-box --web --tunnel`
+    volumes:
+      - ${PROJECT_DIR}:/workspace
+      - ./home:/home/node
+    entrypoint: ["/usr/local/bin/claude-web-serve"]   # instead of claude-launch
+
+  vscode:
+    build:
+      context: .
+      dockerfile: Dockerfile.vscode
+    image: claude-box-vscode
+    labels:
+      - claude-box.role=vscode
+    network_mode: host        # code-server port on the host loopback (see claude-vscode-serve)
+    env_file:
+      - ./.env                # the same secrets + VSCODE_PORT / VSCODE_PASSWORD
+    volumes:
+      - ${PROJECT_DIR}:/workspace
+      - ./home:/home/node
