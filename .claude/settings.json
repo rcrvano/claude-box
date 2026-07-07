@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "deny": [
+      "Read(.env)",
+      "Read(./.env)",
+      "Read(/workspace/claude-box/.env)",
+      "Read(**/.env)",
+      "Read(.env.*)",
+      "Read(**/.env.*)",
+      "Bash(cat .env)",
+      "Bash(cat ./.env)",
+      "Bash(cat *.env*)",
+      "Bash(cat /workspace/claude-box/.env)",
+      "Bash(less .env)",
+      "Bash(head*.env*)",
+      "Bash(tail*.env*)",
+      "Bash(grep* .env*)",
+      "Bash(source .env)",
+      "Bash(. .env)"
+    ]
+  }
+}
