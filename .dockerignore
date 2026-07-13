@@ -1,0 +1,18 @@
+# don't send to the build context (and don't expose secrets to the daemon)
+home/
+.claude/
+.claude.json
+.env
+*.sh
+scripts/*.sh
+!scripts/menu.sh
+# web terminal: needed in the image (web-terminal-selfcheck.sh — host-only, stays excluded)
+!scripts/web-serve.sh
+!scripts/web-menu.sh
+!scripts/web-registry.sh
+!scripts/web-metrics.sh
+!scripts/web-preview.sh
+!scripts/web-search.sh
+!scripts/vscode-serve.sh
+!scripts/notify.sh
+docker-compose.yml
