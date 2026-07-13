@@ -13,6 +13,5 @@ scripts/*.sh
 !scripts/web-metrics.sh
 !scripts/web-preview.sh
 !scripts/web-search.sh
-!scripts/vscode-serve.sh
 !scripts/notify.sh
 docker-compose.yml

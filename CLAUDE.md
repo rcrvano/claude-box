@@ -14,7 +14,7 @@ Guidance for Claude Code (and other agents) working in this repository.
 
 ## Project shape (quick orientation)
 
-- `claude-box` — host entry point (launch / attach / `--web` / `--vscode` / `--tunnel`).
+- `claude-box` — host entry point (launch / attach / `--web` / `--tunnel`).
 - `scripts/` — in-container menu, web terminal (ttyd) sidecar, launcher, metrics, notify.
 - `site/` — the static marketing landing for **claude-box.dev** (Tailwind, self-hosted
   fonts, no CDN; deploy with `./site/deploy.sh`).

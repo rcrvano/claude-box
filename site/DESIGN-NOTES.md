@@ -33,4 +33,4 @@ status-colored left edges + a coral `claude ▸` card. The one memorable thing.
   dangerous-mode prompt — do not claim "zero prompts ever". Frame as "auto-accept, safely boxed".
 - Star count + contributors are live from GitHub API; mockup `1.2k` is placeholder.
 - Only claim shipped capabilities: docker sandbox, web terminal (ttyd), launcher previews,
-  notifications, tunnel (ngrok), VS Code (code-server), MCP servers, superpowers, deep-links.
+  notifications, tunnel (ngrok), MCP servers, superpowers, deep-links.

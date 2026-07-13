@@ -31,17 +31,3 @@ services:
       - ${PROJECT_DIR}:/workspace
       - ./home:/home/node
     entrypoint: ["/usr/local/bin/claude-web-serve"]   # instead of claude-launch
-
-  vscode:
-    build:
-      context: .
-      dockerfile: Dockerfile.vscode
-    image: claude-box-vscode
-    labels:
-      - claude-box.role=vscode
-    network_mode: host        # code-server port on the host loopback (see claude-vscode-serve)
-    env_file:
-      - ./.env                # the same secrets + VSCODE_PORT / VSCODE_PASSWORD
-    volumes:
-      - ${PROJECT_DIR}:/workspace
-      - ./home:/home/node

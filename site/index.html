@@ -178,10 +178,9 @@
           <div class="spec"><span class="id">04</span><h3>Web terminal, any device</h3><p>Claude Code over ttyd in the browser. tmux-backed sessions survive a closed tab or reboot; each one is deep-linkable.</p></div>
           <div class="spec"><span class="id">05</span><h3>Open it from your phone</h3><p><code>claude-box --web --tunnel</code> publishes the terminal over a public HTTPS URL — cloudflared by default (no account needed), ngrok optional. Drop in from your phone, anywhere.</p></div>
           <div class="spec"><span class="id">06</span><h3>It taps your shoulder</h3><p>Browser notifications and a tab-title marker the moment a run finishes 🟢 or needs your input 🟡.</p></div>
-          <div class="spec"><span class="id">07</span><h3>VS Code in the browser</h3><p><code>claude-box --vscode</code> runs code-server on <code>/workspace</code> with the Claude Code extension installed automatically.</p></div>
-          <div class="spec"><span class="id">08</span><h3>Proxied egress</h3><p>Claude → Anthropic traffic is routed through a TLS proxy; internal targets bypass it via <code>NO_PROXY</code>.</p></div>
-          <div class="spec"><span class="id">09</span><h3>MCP servers, pre-seeded</h3><p>GitHub, Atlassian, Sentry, context7, Kubernetes, Figma, Playwright and Grafana seeded into user scope on start.</p></div>
-          <div class="spec"><span class="id">10</span><h3>Plugins &amp; config carried</h3><p>The superpowers plugin, your <code>settings.json</code>, theme and git identity ride along with the repo and apply on clone.</p></div>
+          <div class="spec"><span class="id">07</span><h3>Proxied egress</h3><p>Claude → Anthropic traffic is routed through a TLS proxy; internal targets bypass it via <code>NO_PROXY</code>.</p></div>
+          <div class="spec"><span class="id">08</span><h3>MCP servers, pre-seeded</h3><p>GitHub, Atlassian, Sentry, context7, Kubernetes, Figma, Playwright and Grafana seeded into user scope on start.</p></div>
+          <div class="spec"><span class="id">09</span><h3>Plugins &amp; config carried</h3><p>The superpowers plugin, your <code>settings.json</code>, theme and git identity ride along with the repo and apply on clone.</p></div>
         </div>
       </div>
 
@@ -290,7 +289,7 @@
         <ul class="space-y-2 font-mono text-[13px] text-slate">
           <li>claude-box --web</li>
           <li>… --web --tunnel</li>
-          <li>… --vscode</li>
+          <li>… --build</li>
         </ul>
       </div>
     </div>

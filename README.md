@@ -19,8 +19,6 @@ Claude traffic via a foreign TLS proxy, with state and plugins preserved between
 ./claude-box --web      # bring up the web terminal (ttyd) at http://localhost:7681
 ./claude-box --web --tunnel # + publish it externally (cloudflared without a token / ngrok)
 ./claude-box --web-stop # stop the web terminal
-./claude-box --vscode      # bring up VS Code (code-server) at http://localhost:8080
-./claude-box --vscode-stop # stop VS Code
 ```
 
 `claude-box` is aware of the directory it was launched from (relative to `PROJECT_DIR`):
@@ -47,7 +45,6 @@ The working folder `/workspace` is set in `.env` via `PROJECT_DIR` — this is t
 - **Completion signals** — when Claude finishes a response (or is waiting for input/permission), a bell rings and the tab title changes to `✅/❓/⏳ <session>`; from another tab you can see which Claude has become free. To disable — `CLAUDE_NOTIFY_DISABLE=1` in `.env` (hooks already seeded remain until you manually clear `home/.claude/settings.json`).
 - **Web terminal** — `claude-box --web` brings up ttyd on `127.0.0.1:7681`; the browser opens a picker of tmux sessions (different tabs = different claude sessions, which survive closing the tab). Port/password — `WEB_TERMINAL_PORT` / `WEB_TERMINAL_PASSWORD` in `.env`. Several concurrent sessions share `~/.claude.json` (a shared `./home`), the seed is serialized via flock, but simultaneous active work in the same folder/session from different tabs is not recommended.
 - **Public access from your phone** — `claude-box --web --tunnel` brings up the web terminal and publishes it externally (the tunnel runs inside the container), printing a public `https://` address — connect from your mobile anywhere. The backend is chosen automatically: by default **cloudflared** (TryCloudflare — **no token and no account**, a random `*.trycloudflare.com`); if `NGROK_AUTHTOKEN` is set in `.env`, it goes through **ngrok** (optional `NGROK_DOMAIN` for a permanent address). In any case **`WEB_TERMINAL_PASSWORD` is mandatory** — without it the tunnel won't come up (the web terminal stays local); a public shell without a password is not allowed. The tunnel points at the sidecar's http port (`WEB_TERMINAL_PORT`), but the public URL is still `https` (TLS is terminated by the tunnel provider) — so notifications and clipboard work in the phone's browser. It's torn down together with `--web-stop`.
-- **VS Code in the browser** — `claude-box --vscode` brings up code-server on `127.0.0.1:8080` (a separate `claude-box-vscode` image); it opens VS Code at `/workspace`, with `claude` working in the built-in terminal. Port/password — `VSCODE_PORT` / `VSCODE_PASSWORD` in `.env`. The Claude Code extension is installed automatically on first start (the Claude panel on the right; `claude` in the built-in terminal attaches to it); installed alongside it are common extensions (GitLens, Docker, YAML, TOML, EditorConfig, DotENV) and ones for JS/TS (ESLint, Prettier) — idempotently, best-effort.
 
 ---
 

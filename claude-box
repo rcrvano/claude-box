@@ -110,41 +110,6 @@ case "${1:-}" in
     esac
     exit 0
     ;;
-  --vscode|--vscode-stop|--vscode-status)
-    cd "$REPO"; mkdir -p ./home
-    PORT="${VSCODE_PORT:-8080}"
-    case "$1" in
-      --vscode)
-        # the base claude-box image is needed as FROM for Dockerfile.vscode
-        if ! docker image inspect claude-box >/dev/null 2>&1; then
-          docker compose build \
-            --build-arg HTTP_PROXY= --build-arg HTTPS_PROXY= \
-            --build-arg http_proxy= --build-arg https_proxy= \
-            --build-arg NO_PROXY='*' --build-arg no_proxy='*' claude
-        fi
-        # always rebuild the vscode image (layers are cached) — otherwise an old one without code-server
-        docker compose build \
-          --build-arg HTTP_PROXY= --build-arg HTTPS_PROXY= \
-          --build-arg http_proxy= --build-arg https_proxy= \
-          --build-arg NO_PROXY='*' --build-arg no_proxy='*' vscode
-        docker compose up -d vscode
-        echo "VS Code up: http://localhost:${PORT}"
-        ;;
-      --vscode-stop)
-        docker compose rm -sf vscode
-        echo "VS Code stopped."
-        ;;
-      --vscode-status)
-        cid="$(docker ps -q --filter label=claude-box.role=vscode | head -n1)"
-        if [ -z "$cid" ]; then
-          echo "VS Code not running."
-        else
-          echo "VS Code running: http://localhost:${PORT}"
-        fi
-        ;;
-    esac
-    exit 0
-    ;;
 esac
 
 cd "$REPO"
@@ -200,10 +165,11 @@ if [ "$force_build" -eq 1 ] || ! docker image inspect claude-box >/dev/null 2>&1
   # --build-arg covers only the RUN steps, NOT image resolution. So we disable the proxy in
   # the ENVIRONMENT of the build command (shell env overrides .env per Compose rules); we don't touch .env for run.
 #  HTTP_PROXY= HTTPS_PROXY= http_proxy= https_proxy= NO_PROXY='*' no_proxy='*' \
+  # One target is enough: the web service shares the same Dockerfile and the same claude-box tag.
   docker compose build \
     --build-arg HTTP_PROXY= --build-arg HTTPS_PROXY= \
     --build-arg http_proxy= --build-arg https_proxy= \
-    --build-arg NO_PROXY='*' --build-arg no_proxy='*'
+    --build-arg NO_PROXY='*' --build-arg no_proxy='*' claude
 fi
 
 # --no-proxy: disable the proxy variables ONLY for this run (they override env_file from .env);
