@@ -1,0 +1,33 @@
+# Secrets and state — do NOT commit
+.env
+home/
+certs/*.crt
+certs/*.key
+# each proxy has its own cert (tied to its server) — placed locally, not committed
+
+# Editor junk
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Windows: generated icon/shortcut (make-claude-shortcut.ps1)
+claude.ico
+*.lnk
+
+# visual brainstorming companion
+.superpowers/
+
+# landing-page tooling (not served, not committed)
+bin/tailwindcss
+node_modules/
+.wrangler/
+
+# internal working context (infra/access) — not for the public repo
+CONTEXT.md
+
+# internal plans/specs — not for the public repo
+docs/superpowers/
+
+# local deploy helper (Cloudflare Pages) — not committed
+site/deploy.sh
