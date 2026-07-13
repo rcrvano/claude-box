@@ -25,6 +25,7 @@ services:
       context: .
       network: host           # same reason as the claude service above
     image: claude-box
+    container_name: claude-box-web   # stable name (instead of the generated claude-box-web-1)
     labels:
       - claude-box.role=web
     init: true                # tini as PID1: forwards SIGTERM to the entrypoint + reaps zombies

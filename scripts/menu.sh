@@ -50,6 +50,19 @@ NEWDIR="•  Create a new folder in /workspace…"
 BASHC="•  bash in the container"
 
 O=$'\033[38;5;208m'; B=$'\033[1m'; D=$'\033[2m'; R=$'\033[0m'   # orange / bold / dim / reset
+E=$'\033[31m'                                                  # red (errors)
+
+# Report a failure and hold it on screen. The menu redraw clears the terminal (print_header
+# sends RIS), so without waiting for a keypress the message would flash by unread.
+menu_error() {
+  printf '\n  %s✗ %s%s\n' "$E" "$1" "$R" >&2
+  shift
+  local line
+  for line in "$@"; do printf '  %s%s%s\n' "$D" "$line" "$R" >&2; done
+  printf '\n'
+  read -rsn1 -p '  Press any key to return to the menu…' _ || true
+  printf '\n'
+}
 
 print_header() {
   printf '\033c'                       # reset the terminal before showing the menu
@@ -65,15 +78,28 @@ run_claude() {
   exec claude "$@"
 }
 
+# Create a folder in $WS and start claude in it. Returns non-zero instead of exiting, so the
+# caller can redraw the menu: a failure here (usually an unwritable /workspace) must not kill
+# the whole menu — under `set -e` a bare `mkdir` did exactly that, bouncing the user out silently.
 make_new_dir() {
   local name
   read -rp "  Name of the new folder: " name
   if [ -z "$name" ] || [[ "$name" == */* ]]; then
-    echo "  Invalid name." >&2
-    exit 1
+    menu_error "Invalid folder name." "A name is required and it must not contain '/'."
+    return 1
   fi
-  mkdir -p "$WS/$name"
-  cd "$WS/$name"
+  if ! mkdir -p "$WS/$name" 2>/dev/null; then
+    if [ ! -w "$WS" ]; then
+      menu_error "Cannot write to $WS — it is not writable by uid $(id -u)." \
+                 "This usually means PROJECT_DIR in .env is unset, points at a missing folder," \
+                 "or points at a folder owned by another user: docker then creates the bind-mount" \
+                 "source as root and mounts it read-only for us. Fix PROJECT_DIR and restart."
+    else
+      menu_error "Could not create '$name' in $WS."
+    fi
+    return 1
+  fi
+  cd "$WS/$name" || { menu_error "Created '$name' but could not enter it."; return 1; }
   run_claude
 }
 
@@ -145,7 +171,7 @@ if ! command -v fzf >/dev/null 2>&1; then
   if [ "$choice" = "1" ]; then
     cd "$(mktemp -d /tmp/claude-scratch.XXXXXX)"; run_claude
   elif [ "$choice" = "2" ]; then
-    make_new_dir
+    make_new_dir || exit 1              # message already shown by menu_error
   elif [ "$choice" = "$bash_opt" ]; then
     cd "$WS"; exec bash
   elif [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 3 ] && [ "$choice" -le "$n" ]; then
@@ -172,7 +198,7 @@ while true; do
     "")          exit 0 ;;                                      # Esc — exit
     "$SCRATCH")  cd "$(mktemp -d /tmp/claude-scratch.XXXXXX)"; run_claude ;;
     "$BASHC")    cd "$WS"; exec bash ;;
-    "$NEWDIR")   make_new_dir ;;
+    "$NEWDIR")   make_new_dir || continue ;;                    # failed -> message shown, back to the menu
     '•  /'*)     start_in_dir "${choice#•  }" ;;                # "•  /workspace/<dir>"; Esc inside -> here
     *)           echo "  Invalid choice." >&2; exit 1 ;;
   esac
