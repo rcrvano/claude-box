@@ -5,6 +5,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const { assertSelfContained } = require('./self-contained.js');
 
 const [, , inPath, outPath] = process.argv;
 if (!inPath || !outPath) {
@@ -28,10 +29,10 @@ html = html.replace(/<script[^>]*src="(vendor\/[^"]+\.js)"[^>]*><\/script>/g, fu
   return '<script>\n' + js + '\n</script>';
 });
 
-if (/cdn\.|https?:\/\//.test(html.replace(/https?:\/\/[^"']*\/(ws|token)/g, ''))) {
-  // crude safeguard: the built file should not contain any external asset references
-  // (ws/token are built at runtime from location — we ignore those above)
-}
+assertSelfContained('build-index', html, [
+  ['uninlined vendor/ reference', /(?:href|src)="vendor\//],
+]);
+
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 fs.writeFileSync(outPath, html);
 console.error('built ' + outPath + ' (' + html.length + ' bytes)');

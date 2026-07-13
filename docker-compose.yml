@@ -1,6 +1,11 @@
 services:
   claude:
-    build: .
+    build:
+      context: .
+      # Build over the host network, like the runtime services below. On hosts whose docker
+      # daemon does not manage iptables (daemon.json "iptables": false), the bridge network has
+      # no NAT/egress, so apt/curl inside RUN steps cannot resolve or reach anything.
+      network: host
     image: claude-box
     labels:
       - claude-box.role=session
@@ -16,7 +21,9 @@ services:
       - ./home:/home/node
 
   web:
-    build: .
+    build:
+      context: .
+      network: host           # same reason as the claude service above
     image: claude-box
     labels:
       - claude-box.role=web
