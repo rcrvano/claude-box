@@ -7,6 +7,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const { assertSelfContained } = require('./self-contained.js');
 
 const [, , inPath, outPath] = process.argv;
 if (!inPath || !outPath) {
@@ -24,12 +25,9 @@ html = html.replace(/url\(\s*["']?(fonts\/[^"')]+\.woff2)["']?\s*\)/g, function 
   return 'url(data:font/woff2;base64,' + b64 + ')';
 });
 
-// Crude safeguard: the built file must not reference any external asset or a leftover
-// relative fonts/ path (ws/token are built at runtime from location, so ignore those).
-const probe = html.replace(/https?:\/\/[^"']*\/(ws|token)/g, '');
-if (/cdn\.|https?:\/\//.test(probe) || /url\(\s*["']?fonts\//.test(html)) {
-  console.error('build-launcher: WARNING — external or uninlined asset reference remains');
-}
+assertSelfContained('build-launcher', html, [
+  ['uninlined fonts/ reference', /url\(\s*["']?fonts\//],
+]);
 
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 fs.writeFileSync(outPath, html);

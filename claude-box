@@ -26,6 +26,27 @@ EOF
   exit 0
 fi
 
+# --- PROJECT_DIR sanity check (mounted as /workspace by docker-compose) ---
+# A missing/placeholder/typo'd path is NOT a harmless mistake: docker auto-creates a missing
+# bind-mount source ROOT-owned, so /workspace lands in the container unwritable by node (uid 1000),
+# and every write inside it fails with a bare "Permission denied". Fail loudly here instead.
+PLACEHOLDER='/path/to/your/project'
+PROJECT_DIR_VAL="$(grep -E '^PROJECT_DIR=.+' "$REPO/.env" 2>/dev/null | tail -n1 | cut -d= -f2- || true)"
+PROJECT_DIR_VAL="${PROJECT_DIR_VAL:-${PROJECT_DIR:-}}"
+case "$PROJECT_DIR_VAL" in
+  '')           die_msg="PROJECT_DIR is not set in .env" ;;
+  "$PLACEHOLDER") die_msg="PROJECT_DIR is still the placeholder from .env.example" ;;
+  *)            [ -d "$PROJECT_DIR_VAL" ] || die_msg="PROJECT_DIR points to a non-existent folder: $PROJECT_DIR_VAL" ;;
+esac
+if [ -n "${die_msg:-}" ]; then
+  printf '✗ %s\n\n' "$die_msg" >&2
+  printf '  Set it in %s/.env to the folder you want mounted as /workspace, e.g.:\n' "$REPO" >&2
+  printf '      PROJECT_DIR=%s\n\n' "$HOME/code" >&2
+  printf '  The folder must exist and be owned by your user (uid %s) — otherwise\n' "$(id -u)" >&2
+  printf '  /workspace ends up root-owned and read-only inside the container.\n' >&2
+  exit 1
+fi
+
 # --- web terminal (ttyd daemon): separate mode, does not interfere with normal sessions ---
 case "${1:-}" in
   --web|--web-stop|--web-status)
