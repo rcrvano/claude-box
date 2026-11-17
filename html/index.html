@@ -106,7 +106,15 @@
   window.addEventListener('focus', renderTitle);
 
   // --- browser notifications (secure context / https): on this session's state change ---
+  // Embedded in the launcher (iframe): the launcher shows the notifications for all sessions.
+  var embedded = false;
+  try { embedded = window.self !== window.top; } catch (e) { embedded = true; }
+  // A background frame in the launcher (not the one on screen) — skip cosmetic work.
+  function backgroundFrame() {
+    try { var fe = window.frameElement; return !!fe && !fe.classList.contains('on'); } catch (e) { return false; }
+  }
   function notify(st){
+    if(embedded) return;
     if(!window.Notification || Notification.permission!=='granted') return;
     if(st!=='done' && st!=='waiting') return;
     try{ var n=new Notification(stripMark(rawTitle) || 'claude-box',{
@@ -286,7 +294,7 @@
     bar.innerHTML = parts.join('  ·  ');
   }
   function pollMetrics() {
-    if (document.hidden) return;
+    if (document.hidden || backgroundFrame()) return;   // each poll spawns a helper on the server
     var id = new URLSearchParams(loc.search).get('id') || '';
     fetch('/metrics' + (id ? ('?id=' + encodeURIComponent(id)) : ''), { credentials: 'include' })
       .then(function (r) { return r.ok ? r.json() : null; })

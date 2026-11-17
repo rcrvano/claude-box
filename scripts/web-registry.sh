@@ -5,9 +5,12 @@
 #   get <token>   -> JSON of the record (exit 1 if not found)
 #   list          -> JSON array, newest first, with a live field (tmux has-session)
 #   delete <token>-> kill the tmux session (if alive) + erase the record and preview cache
+#   snapshot      -> save the tokens of the currently running sessions (web-live-sessions.json)
+#   restore       -> after a container restart, recreate those sessions with claude --resume
 set -uo pipefail
 
 REG="${CLAUDE_WEB_REGISTRY:-$HOME/.claude/web-sessions.json}"
+LIVE="${CLAUDE_WEB_LIVE:-$(dirname "$REG")/web-live-sessions.json}"
 mkdir -p "$(dirname "$REG")"
 [ -f "$REG" ] || echo '{}' > "$REG"
 
@@ -74,6 +77,45 @@ case "$cmd" in
     rm -f "$HOME/.claude/web-previews/$tok.ansi" 2>/dev/null || true
     printf 'ok'
     ;;
+  snapshot)
+    # Remember which sessions are running RIGHT NOW (tokens -> $LIVE), so a container restart
+    # can bring them back (see restore). Called periodically and on shutdown by claude-web-serve.
+    # A tmux session may own several records (e.g. after /clear Claude starts a new session id
+    # in the same pane) -> keep only the most recently active record per tmux session.
+    names="$(tmux list-sessions -F '#{session_name}' 2>/dev/null || true)"
+    tmp="$(mktemp "$LIVE.XXXXXX")" || exit 1
+    if jq -c --arg names "$names" '
+         ($names | split("\n") | map(select(length > 0))) as $alive
+         | [.[] | select(.tmuxSession as $s | any($alive[]; . == $s))]
+         | group_by(.tmuxSession) | map(max_by(.lastActivity) | .token)' "$REG" > "$tmp"; then
+      mv "$tmp" "$LIVE"
+    else
+      rm -f "$tmp"; exit 1
+    fi
+    ;;
+  restore)
+    # Bring back the sessions recorded by the last snapshot: each one gets its tmux session
+    # (same name as before) running `claude --resume <id>` in its original cwd.
+    [ -s "$LIVE" ] || exit 0
+    jq -r '.[]?' "$LIVE" 2>/dev/null | while IFS= read -r tok; do
+      rec="$(jq -c --arg t "$tok" '.[$t] // empty' "$REG" 2>/dev/null)"
+      [ -n "$rec" ] || continue                           # deleted from the dashboard meanwhile
+      cid="$(printf '%s' "$rec" | jq -r '.claudeSessionId // empty')"
+      cwd="$(printf '%s' "$rec" | jq -r '.cwd // empty')"
+      sess="$(printf '%s' "$rec" | jq -r '.tmuxSession // empty')"
+      [ -n "$sess" ] || sess="web-$tok"
+      if [ -z "$cid" ] || [ ! -d "$cwd" ]; then
+        echo "restore: skip $sess (folder $cwd is gone)" >&2; continue
+      fi
+      tmux has-session -t "=$sess" 2>/dev/null && continue   # already running
+      if tmux -u new-session -d -s "$sess" -c "$cwd" claude --resume "$cid" 2>/dev/null; then
+        echo "restore: $sess -> claude --resume $cid ($cwd)" >&2
+      else
+        echo "restore: failed to start $sess" >&2
+      fi
+      sleep 0.5      # stagger startups: they all touch the shared ~/.claude.json
+    done
+    ;;
   *)
-    echo "usage: claude-web-registry upsert|get|list|delete" >&2; exit 2;;
+    echo "usage: claude-web-registry upsert|get|list|delete|snapshot|restore" >&2; exit 2;;
 esac

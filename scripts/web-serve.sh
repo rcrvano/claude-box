@@ -109,10 +109,26 @@ if [ "${WEB_TUNNEL:-}" = "1" ]; then
   fi
 fi
 
+# --- Session persistence across container restarts ---
+# Sessions that were running when the container went down are recreated (claude --resume,
+# same tmux name and cwd) BEFORE the launcher comes up, so they show as live right away.
+# WEB_RESTORE_SESSIONS=0 disables this.
+if [ "${WEB_RESTORE_SESSIONS:-1}" != "0" ]; then
+  claude-web-registry restore || true
+fi
+
 ttyd "${ttyd_args[@]}" claude-web-menu &
 ttyd_pid=$!
 claude-web-sidecar &          # holds the public port, proxies /term,/ws,/token to ttyd
 sidecar_pid=$!
+
+# Keep the list of running sessions fresh on disk. The final snapshot is taken in shutdown();
+# the periodic one covers a hard kill (SIGKILL, host crash/reboot) where no trap runs.
+snapshot_pid=""
+if [ "${WEB_RESTORE_SESSIONS:-1}" != "0" ]; then
+  ( while sleep 15; do claude-web-registry snapshot >/dev/null 2>&1 || true; done ) &
+  snapshot_pid=$!
+fi
 
 # Graceful shutdown. PREVIOUSLY it was `exec claude-web-sidecar` -> node became PID1,
 # and PID1 WITHOUT a handler ignores SIGTERM -> docker stop waited 10s and sent SIGKILL (137),
@@ -121,6 +137,12 @@ sidecar_pid=$!
 # to save state), then takes down ttyd and the sidecar. (init:true in compose forwards SIGTERM here.)
 shutdown() {
   trap - TERM INT EXIT
+  # Stop the periodic snapshot and take the final one BEFORE killing tmux — otherwise
+  # it would record "nothing is running" and nothing would be restored on the next start.
+  [ -n "$snapshot_pid" ] && kill "$snapshot_pid" 2>/dev/null || true
+  if [ "${WEB_RESTORE_SESSIONS:-1}" != "0" ]; then
+    claude-web-registry snapshot >/dev/null 2>&1 || true
+  fi
   tmux kill-server 2>/dev/null || true   # SIGHUP to the panes -> Claude flushes state
   sleep 1                                # short pause to allow saving (within the grace period)
   kill "$ttyd_pid" "$sidecar_pid" ${tunnel_pid:+"$tunnel_pid"} 2>/dev/null || true

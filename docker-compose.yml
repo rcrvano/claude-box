@@ -29,6 +29,7 @@ services:
     labels:
       - claude-box.role=web
     init: true                # tini as PID1: forwards SIGTERM to the entrypoint + reaps zombies
+    restart: unless-stopped   # come back after a docker/host restart (sessions are restored, see web-serve.sh)
     stop_grace_period: 15s    # give Claude in tmux time to save before the container is torn down
     network_mode: host        # ttyd port on the host loopback (see claude-web-serve)
     env_file:
