@@ -1181,6 +1181,7 @@ function renderJobs(){
   });
   clearTimeout(jobTimer); if(running) jobTimer=setTimeout(loadDirs, 1500);
 }
+$('newconsole').addEventListener('click', newConsole);
 $('fjobs').addEventListener('click', function(e){ var b=e.target.closest('[data-start]'); if(b) startIn(b.getAttribute('data-start')); });
 
 // folder "⋯" menu (shares the floating #menu with the session rows)
