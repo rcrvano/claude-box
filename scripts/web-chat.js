@@ -331,8 +331,71 @@ function handleUpgrade(req, socket, head) {
   wss.handleUpgrade(req, socket, head, (ws) => wss.emit('connection', ws, req));
 }
 
-// Overlay live chat state onto the registry list (registry only knows about tmux).
+// ---------- session titles from the transcript ----------
+// Claude Code keeps a session's name in its JSONL: `custom-title` (set by /rename or the
+// sidebar's Rename) and `ai-title` (auto-generated). The registry only has what the hooks saw
+// (the first prompt / terminal title), so the sidebar label is resolved from the transcript.
+// Transcripts are append-only, so we cache per file and only read the bytes added since last time.
+const HOME = process.env.HOME || '/home/node';
+const PROJECTS = path.join(HOME, '.claude', 'projects');
+const TITLES = new Map();          // cid -> {file, size, custom, ai}
+function transcriptPath(cid, cwd) {
+  const guess = path.join(PROJECTS, String(cwd || '').replace(/[^a-zA-Z0-9]/g, '-'), cid + '.jsonl');
+  if (fs.existsSync(guess)) return guess;
+  try {
+    for (const d of fs.readdirSync(PROJECTS)) {
+      const f = path.join(PROJECTS, d, cid + '.jsonl'); if (fs.existsSync(f)) return f;
+    }
+  } catch (_) {}
+  return null;
+}
+const TITLE_RE = /"type":"(custom-title|ai-title)","(?:customTitle|aiTitle)":"((?:[^"\\]|\\.)*)"/g;
+function sessionTitles(cid, cwd) {
+  if (!cid) return null;
+  let t = TITLES.get(cid);
+  if (!t || !t.file) { t = { file: transcriptPath(cid, cwd), size: 0, custom: '', ai: '' }; TITLES.set(cid, t); }
+  if (!t.file) { TITLES.delete(cid); return null; }
+  let st; try { st = fs.statSync(t.file); } catch (_) { TITLES.delete(cid); return null; }
+  if (st.size < t.size) { t.size = 0; t.custom = ''; t.ai = ''; }              // rewritten
+  if (st.size > t.size) {
+    const fd = fs.openSync(t.file, 'r');
+    try {
+      const start = Math.max(0, t.size - 1024);                                 // overlap: a line cut last time
+      const buf = Buffer.alloc(st.size - start); fs.readSync(fd, buf, 0, buf.length, start);
+      const text = buf.toString('utf8'); let m; TITLE_RE.lastIndex = 0;
+      while ((m = TITLE_RE.exec(text))) {
+        let v; try { v = JSON.parse('"' + m[2] + '"'); } catch (_) { v = m[2]; }
+        if (m[1] === 'custom-title') t.custom = v; else t.ai = v;
+      }
+    } finally { fs.closeSync(fd); }
+    t.size = st.size;
+  }
+  return t;
+}
+
+async function rename(token, title) {
+  title = String(title || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+  if (!title) throw new Error('empty title');
+  const rec = await registry.get(token);
+  if (!rec || !rec.claudeSessionId) throw new Error('unknown session');
+  await sdkReady;
+  if (sdk && sdk.renameSession) {
+    await sdk.renameSession(rec.claudeSessionId, title, { dir: rec.cwd });
+  } else {                                                                      // SDK unavailable: same entry by hand
+    const f = transcriptPath(rec.claudeSessionId, rec.cwd);
+    if (!f) throw new Error('transcript not found');
+    fs.appendFileSync(f, JSON.stringify({ type: 'custom-title', customTitle: title, sessionId: rec.claudeSessionId }) + '\n');
+  }
+  return title;
+}
+
+// Overlay live chat state and transcript titles onto the registry list (registry only knows tmux).
 function decorate(rows) {
+  rows = rows.map((r) => {
+    const t = sessionTitles(r.claudeSessionId, r.cwd);
+    const title = (t && (t.custom || t.ai)) || r.title;
+    return title === r.title ? r : Object.assign({}, r, { title });
+  });
   return rows.map((r) => {
     const c = BY_CID.get(r.claudeSessionId);
     if (c && c.q) {
@@ -361,4 +424,4 @@ async function stopByToken(token) {
 
 async function info() { await sdkReady; return { enabled: !!sdk, error: loadError }; }
 
-module.exports = { handleUpgrade, decorate, dirs, stopByToken, info };
+module.exports = { handleUpgrade, decorate, dirs, stopByToken, info, rename };

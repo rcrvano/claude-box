@@ -946,6 +946,18 @@ function deleteCategory(id){
   Object.keys(CATS.map).forEach(function(k){ if(CATS.map[k]===id) delete CATS.map[k]; });
   saveCats();
 }
+// Rename a session: written to its transcript as a custom title (same as Claude Code's /rename).
+function renameSession(tok){
+  var s=BYTOK[tok]; var cur=s?dispName(s):'';
+  var name=(prompt('Rename session:', cur)||'').trim(); if(!name || name===cur) return;
+  fetch('rename?id='+encodeURIComponent(tok),{method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({title:name})})
+    .then(function(r){ return r.json(); })
+    .then(function(o){
+      if(!o.ok){ alert('Rename failed: '+(o.error||'')); return; }
+      if(BYTOK[tok]) BYTOK[tok].title=o.title;
+      renderList(true); renderTop(); tick();
+    }).catch(function(){ alert('Rename failed'); });
+}
 // keep a session's category when its token changes (new session gets a token, /clear, ...)
 function moveCat(oldTok, newTok){ if(CATS.map[oldTok]){ CATS.map[newTok]=CATS.map[oldTok]; delete CATS.map[oldTok]; saveCats(); } }
 
@@ -953,7 +965,7 @@ function moveCat(oldTok, newTok){ if(CATS.map[oldTok]){ CATS.map[newTok]=CATS.ma
 var menuEl=$('menu');
 function openMenu(tok, anchor){
   var cur=CATS.map[tok]||'';
-  var h='<div class="mh">Move to</div>';
+  var h='<button type="button" data-act="rename">✎ Rename…</button><hr><div class="mh">Move to</div>';
   CATS.cats.forEach(function(c){ h+='<button type="button" data-cat="'+esc(c.id)+'"'+(cur===c.id?' class="cur"':'')+'>'+esc(c.name)+'</button>'; });
   h+='<button type="button" data-cat=""'+(cur?'':' class="cur"')+'>No category</button><hr>'+
      '<button type="button" data-cat="__new">＋ New category…</button>';
@@ -965,7 +977,9 @@ function openMenu(tok, anchor){
 function closeMenu(){ menuEl.style.display='none'; }
 menuEl.addEventListener('click', function(e){
   var b=e.target.closest('button'); if(!b) return;
-  var tok=menuEl.dataset.tok; closeMenu(); assign(tok, b.getAttribute('data-cat'));
+  var tok=menuEl.dataset.tok; closeMenu();
+  if(b.getAttribute('data-act')==='rename'){ renameSession(tok); return; }
+  assign(tok, b.getAttribute('data-cat'));
 });
 document.addEventListener('pointerdown', function(e){ if(!menuEl.contains(e.target) && !e.target.closest('.more')) closeMenu(); });
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeMenu(); });

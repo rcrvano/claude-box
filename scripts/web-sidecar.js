@@ -102,6 +102,19 @@ const handler = (req, res) => {
       return;
     }
     if (path === '/dirs') { json(res, 200, chat ? chat.dirs() : []); return; }
+    if (path === '/rename' && req.method === 'POST') {
+      // rename a session (custom-title in its transcript, same as Claude Code's /rename)
+      const m = /(?:^|&)id=([^&]*)/.exec(req.url.split('?')[1] || '');
+      let body = '';
+      req.on('data', (d) => { body += d; if (body.length > 4096) req.destroy(); });
+      req.on('end', () => {
+        let title = ''; try { title = JSON.parse(body).title; } catch (_) {}
+        if (!chat || !m) { json(res, 400, { ok: false }); return; }
+        chat.rename(safeDecode(m[1]), title).then((t) => json(res, 200, { ok: true, title: t }),
+          (e) => json(res, 400, { ok: false, error: String(e.message || e) }));
+      });
+      return;
+    }
     if (path === '/categories') {
       if (req.method !== 'POST') { json(res, 200, readCats()); return; }
       let body = '', big = false;
