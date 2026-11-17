@@ -48,7 +48,9 @@
   var params  = new URLSearchParams(loc.search);
   var newName = params.get('new');                       // from the launcher: create a session
   var deepId  = params.get('id') || params.get('arg') || '';
-  var wsArg   = (newName !== null) ? ('new:' + newName) : deepId;   // new:<name> or token
+  var shellAt = params.get('shell');                     // from the launcher: plain bash in the container
+  var wsArg   = (shellAt !== null) ? ('shell:' + shellAt)
+              : (newName !== null) ? ('new:' + newName) : deepId;   // shell:<dir>, new:<name> or token
   var wsQuery = wsArg ? ('?arg=' + encodeURIComponent(wsArg)) : '';
 
   var wsUrl    = (loc.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + loc.host + path + '/ws' + wsQuery;

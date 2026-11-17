@@ -66,6 +66,17 @@ enter_by_token() {
   exec tmux -u attach-session -t "$nm"
 }
 
+# Plain bash in the container (the launcher's "Terminal"): one persistent tmux session per folder,
+# so reopening the terminal returns to the same shell with its history.
+shell_and_enter() {
+  local dir="${1:-/workspace}" nm
+  case "$dir" in /workspace|/workspace/*) ;; *) dir=/workspace ;; esac   # stay inside the workspace
+  [ -d "$dir" ] || dir=/workspace
+  nm="shell"; [ "$dir" != /workspace ] && nm="shell-$(basename "$dir" | tr -c 'A-Za-z0-9_-' '-')"
+  tmux has-session -t "=$nm" 2>/dev/null || tmux -u new-session -d -s "$nm" -c "$dir" bash -l 2>/dev/null || true
+  exec tmux -u attach-session -t "$nm"
+}
+
 # create a new session and enter it
 new_and_enter() {
   local name="$1"
@@ -80,6 +91,7 @@ O=$'\033[38;5;208m'; R=$'\033[0m'
 if [ -n "${1:-}" ]; then
   case "$1" in
     new:*) nm="${1#new:}"; new_and_enter "${nm:-$(next_name)}";;   # explicit creation
+    shell:*) shell_and_enter "${1#shell:}";;      # plain bash in the container (launcher "Terminal")
     *)     enter_by_token "$1";;            # token; not found -> fall through to the menu below
   esac
 fi
