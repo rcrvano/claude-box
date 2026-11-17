@@ -5,6 +5,7 @@
 //   /sessions    -> claude-web-registry list (JSON)
 //   /metrics     -> claude-web-metrics (JSON)
 //   /chat/ws     -> web chat over the Claude Agent SDK (claude-web-chat.js), /chat/info, /dirs
+//   /categories  -> GET/POST the sidebar categories (~/.claude/web-categories.json)
 //   /term,/token,/ws -> proxy to the internal ttyd (127.0.0.1:TTYD_PORT)
 const http = require('http');
 const https = require('https');
@@ -24,6 +25,27 @@ const PW = process.env.WEB_TERMINAL_PASSWORD || '';
 let chat = null;
 try { chat = require(process.env.WEB_CHAT_MODULE || '/usr/local/lib/claude-web/web-chat.js'); }
 catch (e) { console.error('web chat disabled:', e.message); }
+// Sidebar categories: user-made groups + session -> category assignments. Stored server-side
+// so every device (desktop, phone) sees the same layout. Shape: {cats:[{id,name}], map:{token:id}}.
+const CATS_FILE = process.env.WEB_CATEGORIES || require('path').join(process.env.HOME || '/home/node', '.claude', 'web-categories.json');
+function readCats() {
+  try { const o = JSON.parse(fs.readFileSync(CATS_FILE, 'utf8')); return { cats: o.cats || [], map: o.map || {} }; }
+  catch (_) { return { cats: [], map: {} }; }
+}
+function cleanCats(o) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n);
+  const cats = (Array.isArray(o && o.cats) ? o.cats : []).slice(0, 100)
+    .map((c) => ({ id: str(c && c.id, 40), name: str(c && c.name, 80) })).filter((c) => c.id && c.name);
+  const ids = new Set(cats.map((c) => c.id)), map = {};
+  Object.entries((o && typeof o.map === 'object' && o.map) || {}).slice(0, 5000)
+    .forEach(([k, v]) => { if (ids.has(String(v))) map[str(k, 64)] = String(v); });
+  return { cats, map };
+}
+function writeCats(o) {
+  const tmp = CATS_FILE + '.' + process.pid + '.tmp';
+  fs.mkdirSync(require('path').dirname(CATS_FILE), { recursive: true });
+  fs.writeFileSync(tmp, JSON.stringify(o)); fs.renameSync(tmp, CATS_FILE);
+}
 function json(res, code, obj) {
   try { res.writeHead(code, { 'content-type': 'application/json' }); res.end(typeof obj === 'string' ? obj : JSON.stringify(obj)); } catch (_) {}
 }
@@ -80,6 +102,17 @@ const handler = (req, res) => {
       return;
     }
     if (path === '/dirs') { json(res, 200, chat ? chat.dirs() : []); return; }
+    if (path === '/categories') {
+      if (req.method !== 'POST') { json(res, 200, readCats()); return; }
+      let body = '', big = false;
+      req.on('data', (d) => { body += d; if (body.length > 512 << 10) { big = true; req.destroy(); } });
+      req.on('end', () => {
+        if (big) return;
+        try { const o = cleanCats(JSON.parse(body)); writeCats(o); json(res, 200, o); }
+        catch (e) { json(res, 400, { error: String(e.message || e) }); }
+      });
+      return;
+    }
     if (path === '/') {
       fs.readFile(LAUNCHER, (e, buf) => {
         try {

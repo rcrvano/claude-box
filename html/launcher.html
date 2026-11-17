@@ -78,6 +78,34 @@
   .row:hover .del{display:inline-block}
   .row:hover .when{display:none}
   .empty{color:var(--slate);padding:14px 18px;font-size:13px}
+  /* categories */
+  .grp.cat{color:var(--ink)}
+  .grp .acts{display:none;gap:2px;margin-left:4px}
+  .grp:hover .acts{display:inline-flex}
+  .grp:hover .n{display:none}
+  .grp .acts button{border:0;background:transparent;color:var(--slate);cursor:pointer;font-size:12px;padding:2px 4px;border-radius:5px}
+  .grp .acts button:hover{background:var(--panel);color:var(--ink)}
+  .drop{margin:2px 8px 4px;padding:8px 10px;border:1px dashed var(--line);border-radius:9px;color:var(--mute);font-size:12.5px}
+  .zone.over{outline:2px dashed var(--iris);outline-offset:-2px;border-radius:10px;background:rgba(91,91,214,.06)}
+  .row[draggable=true]{cursor:grab}
+  .row.dragging{opacity:.45}
+  .row .more{display:none;flex:0 0 auto;background:transparent;border:0;border-radius:6px;color:var(--slate);
+             font-size:14px;line-height:1;padding:2px 5px;cursor:pointer}
+  .row .more:hover{color:var(--ink);background:var(--panel)}
+  .row:hover .more{display:inline-block}
+  @media (hover:none){ .row .more{display:inline-block} .grp .acts{display:inline-flex} .grp .n{display:none} }
+  .sectlbl{margin:16px 18px 0;color:var(--mute);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+           display:flex;align-items:center}
+  .sectlbl button{margin-left:auto;border:0;background:transparent;color:var(--slate);cursor:pointer;font-size:15px;line-height:1;padding:2px 5px;border-radius:5px}
+  .sectlbl button:hover{background:var(--hover);color:var(--ink)}
+  #menu{position:fixed;z-index:60;display:none;min-width:190px;max-width:260px;background:var(--panel);border:1px solid var(--line);
+        border-radius:10px;box-shadow:0 12px 32px -12px rgba(20,22,40,.35);padding:5px;font-size:13.5px}
+  #menu .mh{padding:5px 9px 3px;color:var(--mute);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  #menu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:7px 9px;border-radius:7px;cursor:pointer;color:var(--ink);
+               overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #menu button:hover{background:var(--hover)}
+  #menu button.cur{color:var(--iris);font-weight:600}
+  #menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
   .result{display:block;margin:2px 8px;padding:8px 10px;border-radius:9px;cursor:pointer}
   .result:hover{background:var(--hover)}
   .result .name{font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -85,8 +113,10 @@
   .result .snip{color:var(--slate);font-size:12px;margin-top:2px;word-break:break-word;font-family:var(--mono);
                 display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
   mark{background:var(--iris);color:#fff;border-radius:3px;padding:0 2px}
-  .side-foot{display:flex;align-items:center;gap:8px;padding:10px 18px;border-top:1px solid var(--line);
-             color:var(--slate);font-family:var(--mono);font-size:11.5px}
+  .side-foot{padding:9px 18px 10px;border-top:1px solid var(--line);color:var(--slate);font-family:var(--mono);font-size:11.5px;line-height:1.6}
+  .side-foot .ln{display:flex;align-items:center;gap:8px;min-width:0}
+  .side-foot #hostm{display:block;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .side-foot .hot{color:var(--err);font-weight:600}
   .livedot{width:7px;height:7px;border-radius:50%;background:var(--live);box-shadow:0 0 0 3px rgba(22,163,74,.15)}
 
   /* ---------- main ---------- */
@@ -231,9 +261,11 @@
   </div>
   <nav id="list"><div class="empty">loading…</div></nav>
   <div id="results" class="hidden"></div>
-  <div class="side-foot"><span class="livedot"></span><span id="scount">…</span></div>
+  <div class="side-foot"><div class="ln"><span class="livedot"></span><span id="scount">…</span></div>
+    <span id="hostm" title="Host: load average · CPU · RAM used/total · free space in /workspace"></span></div>
 </aside>
 <div id="scrim"></div>
+<div id="menu"></div>
 
 <main id="main">
   <div id="topbar">
@@ -325,6 +357,8 @@ var CHAT_ON=false;     // web chat available on the server
 var MAXCONSOLES=8;     // console iframes kept warm (each holds a websocket + a tmux client)
 var newSeq=0;
 var CLOSED=JSON.parse(ls('cb.closed')||'{}');
+var CATS={cats:[], map:{}};   // sidebar categories (server-side, shared by all devices)
+var DRAGGING=false;
 var views=$('views');
 
 // ======================= chat transport: one multiplexed websocket =======================
@@ -524,6 +558,7 @@ function rekey(p, tok){
   if(!tok || p.key===tok) { p.token=tok||p.token; return; }
   if(PANES[tok] && PANES[tok]!==p) dropPane(PANES[tok]);
   delete PANES[p.key]; if(ACTIVE===p.key) ACTIVE=tok;
+  if(p.token) moveCat(p.token, tok);
   p.key=tok; p.token=tok; PANES[tok]=p;
   syncUrl(); renderList(true); renderTop();
 }
@@ -817,44 +852,152 @@ function syncUrl(){
 var LISTSIG='';
 var RECENT_SEC=3*86400;
 function renderList(force){
+  if(DRAGGING) return;                       // a rebuild would cancel the drag in progress
   var rows=ROWS, now=Date.now()/1000;
   var pend=Object.keys(PANES).filter(function(k){ return /^new-/.test(k); });
-  var sig=JSON.stringify([ACTIVE,pend,CLOSED,rows.map(function(s){
+  var sig=JSON.stringify([ACTIVE,pend,CLOSED,CATS,rows.map(function(s){
     return [s.token,statusClass(s),dispName(s),s.cwd,fmt(s.lastActivity),s.mode]; })]);
   if(!force && sig===LISTSIG) return; LISTSIG=sig;
-  var recent=rows.filter(function(s){ return s.live || now-(s.lastActivity||0)<RECENT_SEC; });
-  var old=rows.filter(function(s){ return !(s.live || now-(s.lastActivity||0)<RECENT_SEC); });
+  var catIds={}; CATS.cats.forEach(function(c){ catIds[c.id]=1; });
+  var inCat={}, rest=[];
+  rows.forEach(function(s){ var c=CATS.map[s.token];
+    if(c && catIds[c]) (inCat[c]=inCat[c]||[]).push(s); else rest.push(s); });
   $('scount').textContent = rows.filter(function(s){return s.live;}).length+' running · '+rows.length+' total';
   var h='';
   pend.forEach(function(k){ var p=PANES[k];
     h+='<div class="row pend'+(k===ACTIVE?' active':'')+'" data-key="'+esc(k)+'"><span class="dot"></span>'+
        '<span class="nm">New session'+(p.cwd?' · '+esc(base(p.cwd)):'')+'</span></div>'; });
+  // user categories (in their saved order); members newest first
+  h+='<div class="sectlbl">Categories<button type="button" data-act="newcat" title="New category">＋</button></div>';
+  if(!CATS.cats.length) h+='<div class="drop zone" data-cat="__new">Drag a session here to create a category</div>';
+  CATS.cats.forEach(function(c){
+    var arr=(inCat[c.id]||[]).slice().sort(function(a,b){ return (b.lastActivity||0)-(a.lastActivity||0); });
+    h+='<div class="zone" data-cat="'+esc(c.id)+'">'+group('c:'+c.id, c.name, c.name, arr, false, c.id)+
+       (arr.length||isClosed('c:'+c.id,false)?'':'<div class="drop">Drop sessions here</div>')+'</div>';
+  });
+  // everything else: by folder, then "Older"
+  var recent=rest.filter(function(s){ return s.live || now-(s.lastActivity||0)<RECENT_SEC; });
+  var old=rest.filter(function(s){ return !(s.live || now-(s.lastActivity||0)<RECENT_SEC); });
+  h+='<div class="zone" data-cat="">';
+  if(rest.length) h+='<div class="sectlbl">By folder</div>';
   var groups={}, order=[];
   recent.forEach(function(s){ var k=s.cwd||''; if(!groups[k]){ groups[k]=[]; order.push(k); } groups[k].push(s); });
   order.sort(function(a,b){ return mx(groups[b])-mx(groups[a]); });
   order.forEach(function(k){ h+=group('d:'+k, base(k), k, groups[k]); });
   if(old.length) h+=group('older', 'Older', 'inactive for more than 3 days', old, true);
-  if(!rows.length && !pend.length) h='<div class="empty">No sessions yet — start a new one above.</div>';
+  if(!rows.length && !pend.length) h+='<div class="empty">No sessions yet — start a new one above.</div>';
+  h+='</div>';
   $('list').innerHTML=h;
 }
 function mx(arr){ return Math.max.apply(null, arr.map(function(s){ return s.lastActivity||0; })); }
-function group(id, label, tip, arr, defClosed){
-  var closed = (id in CLOSED) ? CLOSED[id] : !!defClosed;
-  var h='<div class="grp'+(closed?' closed':'')+'" data-grp="'+esc(id)+'" title="'+esc(tip)+'">'+
-        '<span class="chev">▾</span><span class="nm">'+esc(label)+'</span><span class="n">'+arr.length+'</span></div>';
+function isClosed(id, defClosed){ return (id in CLOSED) ? CLOSED[id] : !!defClosed; }
+function group(id, label, tip, arr, defClosed, catId){
+  var closed = isClosed(id, defClosed);
+  var h='<div class="grp'+(catId?' cat':'')+(closed?' closed':'')+'" data-grp="'+esc(id)+'" title="'+esc(tip)+'">'+
+        '<span class="chev">▾</span><span class="nm">'+esc(label)+'</span><span class="n">'+arr.length+'</span>'+
+        (catId?'<span class="acts"><button type="button" data-act="rencat" data-cat="'+esc(catId)+'" title="Rename">✎</button>'+
+               '<button type="button" data-act="delcat" data-cat="'+esc(catId)+'" title="Delete category">✕</button></span>':'')+'</div>';
   if(closed) return h;
   arr.forEach(function(s){
     var cls=statusClass(s), dn=dispName(s);
     h+='<a class="row '+cls+(s.token===ACTIVE?' active':'')+'" href="?s='+encodeURIComponent(s.token)+
-       '" data-key="'+esc(s.token)+'" title="'+esc(dn+(s.cwd?'\n'+s.cwd:''))+'">'+
+       '" draggable="true" data-key="'+esc(s.token)+'" title="'+esc(dn+(s.cwd?'\n'+s.cwd:''))+'">'+
        '<span class="dot"></span><span class="nm">'+esc(dn)+'</span>'+
        (s.live&&s.mode==='console'?'<span class="tag" title="open in the console">&gt;_</span>':'')+
        '<span class="when">'+fmt(s.lastActivity)+'</span>'+
+       '<button class="more" type="button" title="Move to category…" aria-label="Move to category">⋯</button>'+
        '<button class="del" type="button" title="Delete session" aria-label="Delete session">✕</button></a>';
   });
   return h;
 }
+
+// ---------- categories: storage + actions ----------
+function loadCats(){
+  return fetch('categories').then(function(r){ return r.ok?r.json():null; }).then(function(o){
+    if(o && o.cats){ CATS={cats:o.cats, map:o.map||{}}; renderList(true); } }).catch(function(){});
+}
+function saveCats(){
+  renderList(true);
+  fetch('categories',{method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(CATS)})
+    .then(function(r){ return r.ok?r.json():null; }).then(function(o){ if(o&&o.cats){ CATS=o; renderList(true); } })
+    .catch(function(){ alert('Failed to save categories'); });
+}
+function newCategory(thenAssign){
+  var name=(prompt('Category name:')||'').trim(); if(!name) return null;
+  var id='c'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  CATS.cats.push({id:id, name:name.slice(0,80)});
+  if(thenAssign) CATS.map[thenAssign]=id;
+  saveCats(); return id;
+}
+function assign(tok, catId){
+  if(catId==='__new'){ newCategory(tok); return; }
+  if(catId) CATS.map[tok]=catId; else delete CATS.map[tok];
+  saveCats();
+}
+function renameCategory(id){
+  var c=CATS.cats.filter(function(x){ return x.id===id; })[0]; if(!c) return;
+  var name=(prompt('Rename category:', c.name)||'').trim(); if(!name) return;
+  c.name=name.slice(0,80); saveCats();
+}
+function deleteCategory(id){
+  var c=CATS.cats.filter(function(x){ return x.id===id; })[0]; if(!c) return;
+  if(!confirm('Delete category "'+c.name+'"? Its sessions go back to the folder list.')) return;
+  CATS.cats=CATS.cats.filter(function(x){ return x.id!==id; });
+  Object.keys(CATS.map).forEach(function(k){ if(CATS.map[k]===id) delete CATS.map[k]; });
+  saveCats();
+}
+// keep a session's category when its token changes (new session gets a token, /clear, ...)
+function moveCat(oldTok, newTok){ if(CATS.map[oldTok]){ CATS.map[newTok]=CATS.map[oldTok]; delete CATS.map[oldTok]; saveCats(); } }
+
+// ---------- "Move to…" menu (works on touch screens, where drag-and-drop doesn't) ----------
+var menuEl=$('menu');
+function openMenu(tok, anchor){
+  var cur=CATS.map[tok]||'';
+  var h='<div class="mh">Move to</div>';
+  CATS.cats.forEach(function(c){ h+='<button type="button" data-cat="'+esc(c.id)+'"'+(cur===c.id?' class="cur"':'')+'>'+esc(c.name)+'</button>'; });
+  h+='<button type="button" data-cat=""'+(cur?'':' class="cur"')+'>No category</button><hr>'+
+     '<button type="button" data-cat="__new">＋ New category…</button>';
+  menuEl.innerHTML=h; menuEl.dataset.tok=tok; menuEl.style.display='block';
+  var r=anchor.getBoundingClientRect(), w=menuEl.offsetWidth, hh=menuEl.offsetHeight;
+  menuEl.style.left=Math.max(8, Math.min(r.right-w, innerWidth-w-8))+'px';
+  menuEl.style.top=(r.bottom+hh+8<innerHeight ? r.bottom+4 : Math.max(8, r.top-hh-4))+'px';
+}
+function closeMenu(){ menuEl.style.display='none'; }
+menuEl.addEventListener('click', function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  var tok=menuEl.dataset.tok; closeMenu(); assign(tok, b.getAttribute('data-cat'));
+});
+document.addEventListener('pointerdown', function(e){ if(!menuEl.contains(e.target) && !e.target.closest('.more')) closeMenu(); });
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeMenu(); });
+
+// ---------- drag and drop ----------
+var listEl0=$('list'), dragTok=null, overZone=null;
+function setOver(z){ if(overZone===z) return; if(overZone) overZone.classList.remove('over'); overZone=z; if(z) z.classList.add('over'); }
+listEl0.addEventListener('dragstart', function(e){
+  var row=e.target.closest && e.target.closest('.row[draggable=true]'); if(!row) return;
+  dragTok=row.getAttribute('data-key'); DRAGGING=true; row.classList.add('dragging'); closeMenu();
+  try{ e.dataTransfer.setData('text/plain', dragTok); e.dataTransfer.effectAllowed='move'; }catch(_){}
+});
+listEl0.addEventListener('dragover', function(e){
+  if(!dragTok) return; var z=e.target.closest('.zone'); if(!z) { setOver(null); return; }
+  e.preventDefault(); try{ e.dataTransfer.dropEffect='move'; }catch(_){} setOver(z);
+});
+listEl0.addEventListener('dragleave', function(e){ if(!listEl0.contains(e.relatedTarget)) setOver(null); });
+listEl0.addEventListener('drop', function(e){
+  var z=e.target.closest('.zone'); if(!dragTok || !z) return; e.preventDefault();
+  var tok=dragTok, cat=z.getAttribute('data-cat'); endDrag();
+  if((CATS.map[tok]||'')!==cat) assign(tok, cat);
+});
+function endDrag(){ dragTok=null; DRAGGING=false; setOver(null);
+  [].forEach.call(document.querySelectorAll('.row.dragging'), function(r){ r.classList.remove('dragging'); }); }
+listEl0.addEventListener('dragend', function(){ endDrag(); renderList(true); });
+
 $('list').addEventListener('click', function(e){
+  var act=e.target.closest('[data-act]');
+  if(act){ e.preventDefault(); e.stopPropagation();
+    var a=act.getAttribute('data-act'), cid=act.getAttribute('data-cat');
+    if(a==='newcat') newCategory(); else if(a==='rencat') renameCategory(cid); else if(a==='delcat') deleteCategory(cid);
+    return; }
   var g=e.target.closest('.grp');
   if(g){ var id=g.getAttribute('data-grp'); CLOSED[id]=!g.classList.contains('closed');
          ls('cb.closed', JSON.stringify(CLOSED)); renderList(true); return; }
@@ -863,6 +1006,7 @@ $('list').addEventListener('click', function(e){
   e.preventDefault();
   var key=row.getAttribute('data-key');
   if(e.target.closest('.del')){ delSession(key); return; }
+  if(e.target.closest('.more')){ if(menuEl.style.display==='block' && menuEl.dataset.tok===key) closeMenu(); else openMenu(key, e.target.closest('.more')); return; }
   if(PANES[key]) activate(key); else openSession(key);
 });
 function delSession(tok){
@@ -874,6 +1018,7 @@ function delSession(tok){
     .then(function(p){
       if(!(p&&p.ok)){ alert('Failed to delete session'); return; }
       var was=(ACTIVE===tok); if(PANES[tok]) dropPane(PANES[tok]);
+      if(CATS.map[tok]){ delete CATS.map[tok]; saveCats(); }
       if(was) showBlank();
       tick();
     }).catch(function(){ alert('Failed to delete session'); });
@@ -892,6 +1037,26 @@ $('dirs').addEventListener('click', function(e){ var d=e.target.closest('.dir');
 $('newconsole').addEventListener('click', newConsole);
 $('newbtn').addEventListener('click', function(){ if(CHAT_ON) showBlank(); else newConsole(); });
 
+// ======================= host metrics in the sidebar footer (same source as the console bar) =======================
+function fmtBytes(n){
+  if(n==null) return '—'; var u=['B','K','M','G','T'], i=0;
+  while(n>=1024 && i<u.length-1){ n/=1024; i++; }
+  return (i===0||n>=10?Math.round(n):n.toFixed(1))+u[i];
+}
+function pollHost(){
+  if(document.hidden) return;
+  fetch('metrics').then(function(r){ return r.ok?r.json():null; }).then(function(m){
+    if(!m) return; var parts=[];
+    if(m.load!=null) parts.push('load '+Number(m.load).toFixed(2));
+    if(m.cpu!=null) parts.push(m.cpu>85?'<span class="hot">cpu '+m.cpu+'%</span>':'cpu '+m.cpu+'%');
+    if(m.mem&&m.mem.total){ var r='ram '+fmtBytes(m.mem.used)+'/'+fmtBytes(m.mem.total);
+      parts.push(m.mem.used/m.mem.total>0.9?'<span class="hot">'+r+'</span>':r); }
+    if(m.disk&&m.disk.total) parts.push(esc(m.disk.path||'disk')+' '+fmtBytes(m.disk.free));
+    $('hostm').innerHTML=parts.join(' · ');
+  }).catch(function(){});
+}
+pollHost(); setInterval(pollHost, 5000);
+
 // ======================= polling =======================
 function tick(){
   if(document.hidden) return;
@@ -905,7 +1070,8 @@ function tick(){
 }
 setInterval(tick, 2000);
 setInterval(function(){ if(!document.hidden){ followConsoles(); if(PANES[ACTIVE]&&PANES[ACTIVE].mode==='console') renderTop(); } }, 800);
-document.addEventListener('visibilitychange', function(){ if(!document.hidden){ tick(); } });
+document.addEventListener('visibilitychange', function(){ if(!document.hidden){ tick(); loadCats(); } });
+loadCats();
 $('menubtn').addEventListener('click', function(){ $('app').classList.toggle('drawer'); });
 $('scrim').addEventListener('click', function(){ $('app').classList.remove('drawer'); });
 
