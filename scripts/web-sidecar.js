@@ -4,6 +4,7 @@
 //   /            -> launcher (html/launcher.html)
 //   /sessions    -> claude-web-registry list (JSON)
 //   /metrics     -> claude-web-metrics (JSON)
+//   /chat/ws     -> web chat over the Claude Agent SDK (claude-web-chat.js), /chat/info, /dirs
 //   /term,/token,/ws -> proxy to the internal ttyd (127.0.0.1:TTYD_PORT)
 const http = require('http');
 const https = require('https');
@@ -17,6 +18,15 @@ const TLS_PORT = parseInt(process.env.WEB_TLS_PORT || '8443', 10);   // https li
 const TTYD  = parseInt(process.env.TTYD_PORT || '7682', 10);
 const LAUNCHER = process.env.WEB_LAUNCHER || '/usr/local/share/claude-web/launcher.html';
 const PW = process.env.WEB_TERMINAL_PASSWORD || '';
+
+// Web chat module (HTML UI over the Agent SDK). Optional: if it fails to load, the launcher
+// falls back to console-only and everything else keeps working.
+let chat = null;
+try { chat = require(process.env.WEB_CHAT_MODULE || '/usr/local/lib/claude-web/web-chat.js'); }
+catch (e) { console.error('web chat disabled:', e.message); }
+function json(res, code, obj) {
+  try { res.writeHead(code, { 'content-type': 'application/json' }); res.end(typeof obj === 'string' ? obj : JSON.stringify(obj)); } catch (_) {}
+}
 
 // The sidecar is a long-lived proxy: NO single bad request must crash the process,
 // otherwise ALL WS sessions break at once. Swallow uncaught errors, don't exit.
@@ -58,10 +68,18 @@ const handler = (req, res) => {
     const path = req.url.split('?')[0];
     if (path === '/sessions') {
       execFile('claude-web-registry', ['list'], { maxBuffer: 4 << 20 }, (e, out) => {
-        try { res.writeHead(e ? 500 : 200, { 'content-type': 'application/json' }); res.end(e ? '[]' : out); } catch (_) {}
+        if (e) { json(res, 500, '[]'); return; }
+        let rows; try { rows = JSON.parse(out); } catch (_) { json(res, 500, '[]'); return; }
+        json(res, 200, chat ? chat.decorate(rows) : rows);
       });
       return;
     }
+    if (path === '/chat/info') {
+      if (!chat) { json(res, 200, { enabled: false, error: 'chat module not loaded' }); return; }
+      chat.info().then((i) => json(res, 200, i), () => json(res, 200, { enabled: false }));
+      return;
+    }
+    if (path === '/dirs') { json(res, 200, chat ? chat.dirs() : []); return; }
     if (path === '/') {
       fs.readFile(LAUNCHER, (e, buf) => {
         try {
@@ -96,8 +114,11 @@ const handler = (req, res) => {
       const q = req.url.split('?')[1] || '';
       const m = /(?:^|&)id=([^&]*)/.exec(q);
       if (!m) { try { res.writeHead(400, { 'content-type': 'application/json' }); res.end('{"ok":false}'); } catch (_) {} return; }
-      execFile('claude-web-registry', ['delete', safeDecode(m[1])], { maxBuffer: 1 << 20 }, (e) => {
-        try { res.writeHead(e ? 500 : 200, { 'content-type': 'application/json' }); res.end(e ? '{"ok":false}' : '{"ok":true}'); } catch (_) {}
+      const tok = safeDecode(m[1]);
+      Promise.resolve(chat && chat.stopByToken(tok)).catch(() => {}).then(() => {
+        execFile('claude-web-registry', ['delete', tok], { maxBuffer: 1 << 20 }, (e) => {
+          json(res, e ? 500 : 200, e ? '{"ok":false}' : '{"ok":true}');
+        });
       });
       return;
     }
@@ -137,6 +158,10 @@ if (process.env.WEB_TLS_CERT && process.env.WEB_TLS_KEY) {
 function onUpgrade(req, socket, head) {
   try {
     if (!authed(req)) { socket.end('HTTP/1.1 401 Unauthorized\r\n\r\n'); return; }
+    if (req.url.split('?')[0] === '/chat/ws') {
+      if (!chat) { socket.end('HTTP/1.1 503 Service Unavailable\r\n\r\n'); return; }
+      chat.handleUpgrade(req, socket, head); return;
+    }
     const up = net.connect(TTYD, '127.0.0.1', () => {
       up.write(`${req.method} ${req.url} HTTP/1.1\r\n` +
         Object.entries(req.headers).map(([k, v]) => `${k}: ${v}`).join('\r\n') + '\r\n\r\n');

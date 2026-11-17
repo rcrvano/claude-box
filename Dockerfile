@@ -73,6 +73,17 @@ RUN chmod +x /usr/local/bin/claude-web-serve /usr/local/bin/claude-web-menu \
       /usr/local/bin/claude-web-metrics /usr/local/bin/claude-web-preview \
       /usr/local/bin/claude-web-search
 
+# Web chat: Claude Agent SDK + ws for the HTML chat mode of the launcher (claude-web-chat.js,
+# loaded by the sidecar). Kept in its own prefix, versions pinned like the binaries above.
+ARG CLAUDE_AGENT_SDK_VERSION=0.3.326
+ARG WS_VERSION=8.18.0
+RUN mkdir -p /opt/claude-web-chat && cd /opt/claude-web-chat \
+ && echo '{"name":"claude-web-chat","private":true}' > package.json \
+ && npm install --omit=dev --no-audit --no-fund \
+      "@anthropic-ai/claude-agent-sdk@${CLAUDE_AGENT_SDK_VERSION}" "ws@${WS_VERSION}" \
+ && npm cache clean --force
+COPY scripts/web-chat.js /usr/local/lib/claude-web/web-chat.js
+
 # Custom ttyd frontend (--index): sound on bell, hidden scroll, deep-link.
 # xterm is vendored locally (html/vendor) and inlined into a self-contained index.html
 # (ttyd serves a SINGLE file; we don't use a CDN — the terminal has shell access).

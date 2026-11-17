@@ -16,6 +16,7 @@ Guidance for Claude Code (and other agents) working in this repository.
 
 - `claude-box` — host entry point (launch / attach / `--web` / `--tunnel`).
 - `scripts/` — in-container menu, web terminal (ttyd) sidecar, launcher, metrics, notify.
+  `scripts/web-chat.js` — web chat mode: Claude Agent SDK sessions streamed to the launcher over `/chat/ws`.
 - `site/` — the static marketing landing for **claude-box.dev** (Tailwind, self-hosted
   fonts, no CDN; deploy with `./site/deploy.sh`).
 - `html/` — the in-product web terminal / session launcher pages.

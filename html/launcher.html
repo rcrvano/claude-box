@@ -12,10 +12,11 @@
   @font-face{font-family:'IBM Plex Mono';font-weight:600;font-display:swap;src:url(fonts/plex-600.woff2) format("woff2")}
 
   :root{
-    --paper:#f7f8fa; --panel:#fff; --ink:#0e1116; --slate:#5b6573; --mute:#8a93a2;
-    --iris:#5b5bd6; --iris-d:#4848c7; --line:#e6e9ef; --hover:#eceef3; --sel:#e3e5ec;
-    --screen:#0e1116; --screen-line:#262b36; --screen-meta:#8a93a2;
-    --live:#16a34a; --wait:#e0a100; --work:#d97757; --stop:#9aa7b8;
+    --paper:#f7f8fa; --panel:#fff; --ink:#0e1116; --body:#1f2430; --slate:#5b6573; --mute:#8a93a2;
+    --iris:#5b5bd6; --iris-d:#4848c7; --line:#e6e9ef; --hover:#eceef3; --sel:#e3e5ec; --bubble:#eef0f4;
+    --codebg:#f3f4f7; --screen:#0e1116; --screen-line:#262b36; --screen-meta:#8a93a2;
+    --live:#16a34a; --wait:#e0a100; --work:#d97757; --stop:#9aa7b8; --err:#c2410c;
+    --add:#e7f6ec; --addt:#166534; --del:#fdecea; --delt:#9f1d1d;
     --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
     --display:'Space Grotesk',system-ui,sans-serif;
     --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,"DejaVu Sans Mono",monospace;
@@ -23,21 +24,21 @@
   }
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{margin:0;background:var(--screen);color:var(--ink);font:14px/1.45 var(--sans);overflow:hidden;
+  body{margin:0;background:var(--panel);color:var(--ink);font:15px/1.6 var(--sans);overflow:hidden;
        -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
   .app{display:grid;grid-template-columns:var(--side) minmax(0,1fr);height:100vh;height:100dvh}
   .hidden{display:none!important}
+  button{font-family:inherit}
 
   /* ---------- sidebar ---------- */
-  #side{display:flex;flex-direction:column;min-height:0;background:var(--paper);border-right:1px solid var(--line)}
+  #side{display:flex;flex-direction:column;min-height:0;background:var(--paper);border-right:1px solid var(--line);font-size:14px;line-height:1.45}
   .side-head{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 10px}
   .brand{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:-.025em;color:var(--ink)}
   .brand-mark{height:22px;width:22px;flex-shrink:0}
   .brand b{font-family:var(--mono);font-weight:600;color:var(--iris)}
   .iconbtn{background:transparent;border:0;border-radius:8px;color:var(--slate);cursor:pointer;
-           width:30px;height:30px;font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+           width:30px;height:30px;font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
   .iconbtn:hover{background:var(--hover);color:var(--ink)}
-
   .navbtn{display:flex;align-items:center;gap:10px;margin:0 8px;padding:8px 10px;border:0;border-radius:9px;
           background:transparent;color:var(--ink);font:500 14px var(--sans);cursor:pointer;text-align:left}
   .navbtn:hover{background:var(--hover)}
@@ -50,7 +51,6 @@
   .searchbox .ico{position:absolute;left:11px;top:7px;color:var(--slate);pointer-events:none}
   .scope{display:flex;align-items:center;gap:6px;margin:4px 4px 0 10px;color:var(--slate);font-size:12px;cursor:pointer;user-select:none}
   .scope input{accent-color:var(--iris)}
-
   #list,#results{flex:1;min-height:0;overflow-y:auto;padding:4px 0 16px}
   .grp{display:flex;align-items:center;gap:6px;margin:14px 8px 3px;padding:0 10px;color:var(--slate);
        font-size:12.5px;font-weight:600;cursor:pointer;user-select:none}
@@ -58,7 +58,6 @@
   .grp .chev{font-size:10px;transition:transform .15s}
   .grp.closed .chev{transform:rotate(-90deg)}
   .grp .n{margin-left:auto;font-weight:400;color:var(--mute);font-family:var(--mono);font-size:11px}
-
   .row{position:relative;display:flex;align-items:center;gap:9px;margin:1px 8px;padding:7px 10px;border-radius:9px;
        color:var(--ink);text-decoration:none;cursor:pointer}
   .row:hover{background:var(--hover)}
@@ -71,15 +70,14 @@
   @keyframes pulse{50%{opacity:.35}}
   .row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .row.stop .nm{color:var(--slate)}
+  .row .tag{flex:0 0 auto;font:600 10px var(--mono);color:var(--mute);border:1px solid var(--line);border-radius:4px;padding:0 3px}
   .row .when{flex:0 0 auto;color:var(--mute);font-size:11.5px}
-  .row .open{flex:0 0 auto;width:5px;height:5px;border-radius:50%;background:var(--iris);opacity:.7}
   .row .del{display:none;flex:0 0 auto;background:transparent;border:0;border-radius:6px;color:var(--slate);
             font-size:12px;line-height:1;padding:4px 5px;cursor:pointer}
   .row .del:hover{color:var(--work);background:var(--panel)}
   .row:hover .del{display:inline-block}
   .row:hover .when{display:none}
   .empty{color:var(--slate);padding:14px 18px;font-size:13px}
-
   .result{display:block;margin:2px 8px;padding:8px 10px;border-radius:9px;cursor:pointer}
   .result:hover{background:var(--hover)}
   .result .name{font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -87,46 +85,117 @@
   .result .snip{color:var(--slate);font-size:12px;margin-top:2px;word-break:break-word;font-family:var(--mono);
                 display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
   mark{background:var(--iris);color:#fff;border-radius:3px;padding:0 2px}
-
   .side-foot{display:flex;align-items:center;gap:8px;padding:10px 18px;border-top:1px solid var(--line);
              color:var(--slate);font-family:var(--mono);font-size:11.5px}
   .livedot{width:7px;height:7px;border-radius:50%;background:var(--live);box-shadow:0 0 0 3px rgba(22,163,74,.15)}
 
-  /* ---------- main: terminal frames ---------- */
-  #main{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--screen)}
-  #topbar{display:flex;align-items:center;gap:8px;height:34px;padding:0 8px 0 12px;border-bottom:1px solid var(--screen-line);
-          color:var(--screen-meta);font:12.5px var(--mono)}
-  #topbar .iconbtn{color:var(--screen-meta);width:28px;height:26px;font-size:14px}
-  #topbar .iconbtn:hover{background:#1b2029;color:#e7eaf0}
-  #ttl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e7eaf0}
-  #ttl .cwd{color:var(--screen-meta);margin-left:8px}
-  #frames{position:relative;flex:1;min-height:0}
-  /* All frames stay laid out at full size (visibility, not display:none), so each xterm keeps
+  /* ---------- main ---------- */
+  #main{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--panel)}
+  #topbar{display:flex;align-items:center;gap:10px;height:48px;padding:0 10px 0 16px;border-bottom:1px solid var(--line);font-size:14px}
+  #ttl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+  #ttl .cwd{color:var(--mute);font:400 12px var(--mono);margin-left:10px}
+  .seg{display:inline-flex;background:var(--hover);border-radius:9px;padding:3px;gap:2px;flex:0 0 auto}
+  .seg button{border:0;background:transparent;border-radius:7px;padding:4px 12px;font:500 13px var(--sans);color:var(--slate);cursor:pointer}
+  .seg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(16,17,22,.12)}
+  .seg button:disabled{opacity:.45;cursor:default}
+  #views{position:relative;flex:1;min-height:0}
+  /* Console frames stay laid out at full size (visibility, not display:none), so each xterm keeps
      its real dimensions and switching is instant — no refit, no reconnect, no redraw. */
-  #frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;visibility:hidden}
-  #frames iframe.on{visibility:visible}
-  #blank{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-         color:var(--screen-meta);font:13px var(--mono);text-align:center;padding:20px}
-  #blank .btn{padding:9px 16px;background:var(--iris);border:0;border-radius:10px;color:#fff;font:600 13.5px var(--sans);cursor:pointer}
-  #blank .btn:hover{background:var(--iris-d)}
+  #views iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;visibility:hidden}
+  #views iframe.on{visibility:visible}
+  #views .chat{position:absolute;inset:0;display:none;flex-direction:column}
+  #views .chat.on{display:flex}
+  #blank{position:absolute;inset:0;overflow:auto;padding:48px 20px}
+  #blank .inner{max-width:560px;margin:0 auto}
+  #blank h2{font:700 22px var(--display);letter-spacing:-.02em;margin:0 0 4px}
+  #blank p{color:var(--slate);margin:0 0 18px;font-size:14px}
+  .dirs{display:flex;flex-direction:column;gap:4px}
+  .dir{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--panel)}
+  .dir:hover{border-color:var(--iris)}
+  .dir .p{color:var(--mute);font:12px var(--mono);margin-left:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .linkbtn{background:none;border:0;color:var(--iris);cursor:pointer;padding:0;font:inherit;font-size:13px}
   #menubtn{display:none}
   #scrim{display:none}
 
-  /* ---------- narrow screens: sidebar becomes an overlay drawer ---------- */
+  /* ---------- chat ---------- */
+  .chat .log{flex:1;min-height:0;overflow-y:auto}
+  .chat .inner{max-width:820px;margin:0 auto;padding:24px 24px 32px}
+  .msg{margin:14px 0;color:var(--body);word-wrap:break-word}
+  .msg.user{display:flex;justify-content:flex-end}
+  .msg.user .b{max-width:85%;background:var(--bubble);border-radius:16px;padding:10px 15px;white-space:pre-wrap}
+  .msg.asst > :first-child{margin-top:0} .msg.asst > :last-child{margin-bottom:0}
+  .msg.asst p{margin:.55em 0}
+  .msg.asst h1,.msg.asst h2,.msg.asst h3,.msg.asst h4{font-family:var(--sans);font-weight:600;line-height:1.3;margin:1.1em 0 .4em}
+  .msg.asst h1{font-size:1.3em}.msg.asst h2{font-size:1.18em}.msg.asst h3{font-size:1.06em}.msg.asst h4{font-size:1em}
+  .msg.asst ul,.msg.asst ol{padding-left:1.4em;margin:.5em 0} .msg.asst li{margin:.2em 0}
+  .msg.asst blockquote{margin:.6em 0;padding-left:12px;border-left:3px solid var(--line);color:var(--slate)}
+  .msg.asst a{color:var(--iris)}
+  .msg.asst hr{border:0;border-top:1px solid var(--line);margin:1em 0}
+  .msg.asst table{border-collapse:collapse;margin:.6em 0;font-size:14px;display:block;overflow-x:auto}
+  .msg.asst th,.msg.asst td{border:1px solid var(--line);padding:5px 10px;text-align:left}
+  .msg.asst th{background:var(--paper);font-weight:600}
+  code{font-family:var(--mono);font-size:.88em;background:var(--codebg);border-radius:5px;padding:.1em .35em}
+  pre{font-family:var(--mono);font-size:13px;line-height:1.5;background:var(--codebg);border-radius:10px;padding:12px 14px;
+      overflow-x:auto;margin:.7em 0;white-space:pre} pre code{background:none;padding:0;font-size:inherit}
+  .msg.live .cursor{display:inline-block;width:8px;height:1em;vertical-align:-2px;background:var(--work);margin-left:2px;animation:pulse 1s infinite}
+  .tool{margin:8px 0;font-size:14px}
+  .tool > summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:8px;color:var(--slate);padding:2px 0}
+  .tool > summary::-webkit-details-marker{display:none}
+  .tool > summary .tn{font-weight:600;color:var(--ink);flex:0 0 auto}
+  .tool > summary .ts{font-family:var(--mono);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .tool > summary:before{content:"●";font-size:10px;color:var(--live);flex:0 0 auto;transform:translateY(-1px)}
+  .tool.pending > summary:before{color:var(--work);animation:pulse 1s infinite}
+  .tool.err > summary:before{color:var(--err)}
+  .tool .body{margin:6px 0 0 18px}
+  .tool .body pre{max-height:360px;overflow:auto;font-size:12.5px;margin:4px 0}
+  .tool .lbl{font-size:11.5px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;margin-top:6px}
+  .tool.err .res{background:var(--del);color:var(--delt)}
+  .diff{padding:0;overflow:auto} .diff div{padding:0 12px} .diff .a{background:var(--add);color:var(--addt)} .diff .d{background:var(--del);color:var(--delt)}
+  .note{margin:10px 0;color:var(--mute);font-size:13px;text-align:center}
+  .note.err{color:var(--err)}
+  .note pre{text-align:left}
+  .thinking{color:var(--mute);font-size:13.5px;margin:8px 0;font-style:italic;white-space:pre-wrap}
+
+  .composer{padding:0 24px 18px;background:linear-gradient(transparent,var(--panel) 18px)}
+  .composer .wrap{max-width:820px;margin:0 auto}
+  .banner{margin:0 0 10px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper);font-size:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .perm{margin:0 0 10px;padding:12px 14px;border:1px solid var(--wait);border-radius:12px;background:#fffbea;font-size:14px}
+  .perm .h{font-weight:600;margin-bottom:4px}
+  .perm pre{max-height:220px;overflow:auto;background:#fff;font-size:12.5px;margin:6px 0}
+  .perm .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .perm .q{margin:8px 0}.perm .q .qt{font-weight:600}.perm .opts{display:flex;flex-direction:column;gap:4px;margin-top:4px}
+  .perm .opt{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}
+  .perm .opt small{display:block;color:var(--slate)}
+  .perm input[type=text]{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:8px;font:14px var(--sans)}
+  .btn{padding:7px 14px;background:var(--iris);border:0;border-radius:9px;color:#fff;font:600 13.5px var(--sans);cursor:pointer}
+  .btn:hover{background:var(--iris-d)} .btn.ghost{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{background:var(--hover)} .btn.warn{background:var(--work)} .btn:disabled{opacity:.5;cursor:default}
+  .box{border:1px solid var(--line);border-radius:16px;background:var(--panel);box-shadow:0 4px 18px -10px rgba(20,22,40,.25);padding:10px 12px 8px}
+  .box:focus-within{border-color:#c9cce0}
+  .box textarea{width:100%;border:0;outline:none;resize:none;font:15px/1.5 var(--sans);color:var(--ink);background:transparent;max-height:40vh;min-height:26px;padding:2px 2px}
+  .box .bar{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:12.5px;color:var(--mute)}
+  .box select{border:1px solid var(--line);border-radius:7px;background:var(--panel);font:12.5px var(--sans);color:var(--slate);padding:3px 4px}
+  .box .stat{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--mono);font-size:11.5px}
+  .box .stat i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--stop);margin-right:6px}
+  .box .stat.run i{background:var(--work);animation:pulse 1.2s infinite} .box .stat.wait i{background:var(--wait)} .box .stat.idle i{background:var(--live)}
+  .sendbtn{width:32px;height:32px;border-radius:50%;border:0;background:var(--ink);color:#fff;cursor:pointer;font-size:16px;display:inline-flex;align-items:center;justify-content:center}
+  .sendbtn:disabled{opacity:.3;cursor:default} .stopbtn{background:var(--work)}
+
   @media (max-width:760px){
     .app{grid-template-columns:1fr}
     #side{position:fixed;z-index:20;left:0;top:0;bottom:0;width:min(86vw,320px);transform:translateX(-100%);
-          transition:transform .18s ease;box-shadow:0 0 40px rgba(0,0,0,.35)}
-    .app.drawer #side{transform:none}
+          transition:transform .18s ease}
+    .app.drawer #side{transform:none;box-shadow:0 0 40px rgba(0,0,0,.35)}
     #menubtn{display:inline-flex}
     #scrim{position:fixed;inset:0;z-index:15;background:rgba(0,0,0,.35)}
     .app.drawer #scrim{display:block}
+    #ttl .cwd{display:none}
+    .chat .inner{padding:16px 14px 24px} .composer{padding:0 10px 10px}
   }
 </style></head><body><div class="app" id="app">
 
 <aside id="side">
-  <div class="side-head">
-    <div class="brand"><svg class="brand-mark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="claude-box"> <g fill="none" stroke="#5B5BD6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"> <path d="M19 14 H13 V50 H19"/> <path d="M45 14 H51 V50 H45"/> </g> <g transform="translate(20 20) scale(0.024)"> <path fill="#D97757" d="M474.0000305,1000L449,981l-14.0000305-31.000061L449,888l16-80
+  <div class="side-head"><div class="brand"><svg class="brand-mark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="claude-box"> <g fill="none" stroke="#5B5BD6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"> <path d="M19 14 H13 V50 H19"/> <path d="M45 14 H51 V50 H45"/> </g> <g transform="translate(20 20) scale(0.024)"> <path fill="#D97757" d="M474.0000305,1000L449,981l-14.0000305-31.000061L449,888l16-80
  l13-63.999939L490,665l7.0000305-26L496,637l-4.9999695,1L431,720l-91,123l-72,76l-17,7.000061L221,911l3-28l17-24.000061
  l99-126.9998779L400.0000305,653L439,608l-1-6h-2l-264,172L125,780l-21-19l3-31l10-10l79-55l197-110l3-10l-3-5h-9.9999695
  l-33.000061-2L238,535l-97-4l-95-5l-24-5L0,491.0000305L2,476l20-12.9999695L51,465l63,5l94.9999847,6L278,480.0000305l102,11h16
@@ -137,8 +206,7 @@
  l-32.000061,57L691,443h7.000061L817,417.0000305l64.999939-11L958,393l35,16l4,16l-14.000061,34L901,479l-96,19l-143,34l-2,1l2,3
  l64,6l28,2h68l126.000061,9L981,575l19,26l-3,21l-51,25l-68-16l-160-38l-54-13h-8v4l46,45l83,75l105,97.000061l5,23.9998779
  L881.999939,845L868,843l-92-70l-36-31l-80-66.999939h-5V682l18,27.000061L771,856l5,45l-7,13.999939L743,924l-27-5l-58-80l-59-91
- l-48-81l-5,4l-29,302l-13,15L474.0000305,1000z"/> </g> </svg><span>claude-<b>box</b></span></div>
-  </div>
+ l-48-81l-5,4l-29,302l-13,15L474.0000305,1000z"/> </g> </svg><span>claude-<b>box</b></span></div></div>
   <button id="newbtn" class="navbtn" type="button"><span class="ico">＋</span>New session</button>
   <div class="searchbox">
     <span class="ico">⌕</span><input id="q" type="text" placeholder="Search history" autocomplete="off">
@@ -154,11 +222,16 @@
   <div id="topbar">
     <button id="menubtn" class="iconbtn" type="button" title="Sessions" aria-label="Sessions">☰</button>
     <span id="ttl"></span>
-    <a id="popout" class="iconbtn hidden" target="_blank" rel="noopener" title="Open in a new browser tab" aria-label="Open in a new browser tab">↗</a>
+    <div class="seg hidden" id="modeseg"><button type="button" data-m="chat">Chat</button><button type="button" data-m="console">Console</button></div>
+    <a id="popout" class="iconbtn hidden" target="_blank" rel="noopener" title="Open the console in a new browser tab" aria-label="Open the console in a new browser tab">↗</a>
   </div>
-  <div id="frames">
-    <div id="blank"><div>Pick a session on the left — or start a new one.</div>
-      <button class="btn" type="button" id="blanknew">New session</button></div>
+  <div id="views">
+    <div id="blank"><div class="inner">
+      <h2>New session</h2>
+      <p>Pick a folder — Claude starts there. You can switch any session to the console at any time.</p>
+      <div class="dirs" id="dirs"><div class="empty">loading…</div></div>
+      <p style="margin-top:16px"><button class="linkbtn" type="button" id="newconsole">Or open the classic console menu ›</button></p>
+    </div></div>
   </div>
 </main>
 
@@ -171,114 +244,489 @@ function fmt(ts){ if(!ts) return ''; var d=Math.floor(Date.now()/1000)-ts;
   if(d<86400) return Math.floor(d/3600)+'h'; return Math.floor(d/86400)+'d'; }
 function base(p){ p=(p||'').replace(/\/+$/,''); return p.slice(p.lastIndexOf('/')+1) || p || '(no folder)'; }
 function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
+function el(tag, cls, html){ var e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; }
 
-// --- session state -> row class ---
-//   !live -> stop · waiting -> wait (amber) · working -> work (coral) · done/— -> live (green)
+// ======================= markdown (small, safe: everything is escaped first) =======================
+function mdInline(s){
+  var codes=[];
+  s=s.replace(/`([^`\n]+)`/g,function(_,c){ codes.push(c); return '\u0000'+(codes.length-1)+'\u0000'; });
+  s=esc(s)
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/(^|[^*\w])\*([^*\n]+)\*(?!\w)/g,'$1<em>$2</em>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g,'$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+  return s.replace(/\u0000(\d+)\u0000/g,function(_,i){ return '<code>'+esc(codes[+i])+'</code>'; });
+}
+function md(src){
+  var out=[], lines=String(src||'').replace(/\r/g,'').split('\n'), i=0;
+  function isTable(j){ return /^\s*\|.*\|\s*$/.test(lines[j]||'') && /^\s*\|[\s:|-]+\|\s*$/.test(lines[j+1]||''); }
+  while(i<lines.length){
+    var l=lines[i], m;
+    if((m=/^\s*```(\S*)/.exec(l))){ var buf=[]; i++;
+      while(i<lines.length && !/^\s*```\s*$/.test(lines[i])) buf.push(lines[i++]); i++;
+      out.push('<pre><code>'+esc(buf.join('\n'))+'</code></pre>'); continue; }
+    if(!l.trim()){ i++; continue; }
+    if((m=/^(#{1,6})\s+(.*)$/.exec(l))){ var n=Math.min(4,m[1].length); out.push('<h'+n+'>'+mdInline(m[2])+'</h'+n+'>'); i++; continue; }
+    if(/^\s*([-*_])\s*\1\s*\1[\s\1]*$/.test(l)){ out.push('<hr>'); i++; continue; }
+    if(isTable(i)){
+      var row=function(t){ return t.trim().replace(/^\||\|$/g,'').split('|').map(function(c){ return mdInline(c.trim()); }); };
+      var h='<table><tr>'+row(lines[i]).map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr>'; i+=2;
+      while(i<lines.length && /^\s*\|.*\|\s*$/.test(lines[i])){ h+='<tr>'+row(lines[i]).map(function(c){return '<td>'+c+'</td>';}).join('')+'</tr>'; i++; }
+      out.push(h+'</table>'); continue; }
+    if(/^\s*>/.test(l)){ var q=[]; while(i<lines.length && /^\s*>/.test(lines[i])) q.push(lines[i++].replace(/^\s*>\s?/,''));
+      out.push('<blockquote>'+md(q.join('\n'))+'</blockquote>'); continue; }
+    if((m=/^(\s*)([-*+]|\d+[.)])\s+/.exec(l))){
+      var ordered=/\d/.test(m[2]), items=[], cur=null;
+      while(i<lines.length){
+        var li=lines[i], mm=/^(\s*)([-*+]|\d+[.)])\s+(.*)$/.exec(li);
+        if(mm && mm[1].length<=m[1].length+1 && /\d/.test(mm[2])===ordered){ cur=[mm[3]]; items.push(cur); i++; continue; }
+        if(cur && li.trim() && /^\s{2,}/.test(li)){ cur.push(li.replace(/^\s{2,4}/,'')); i++; continue; }
+        if(cur && !li.trim() && /^(\s*)([-*+]|\d+[.)])\s+/.test(lines[i+1]||'')){ i++; continue; }
+        break;
+      }
+      out.push((ordered?'<ol>':'<ul>')+items.map(function(it){
+        return '<li>'+(it.length>1?md(it.join('\n')):mdInline(it[0]))+'</li>'; }).join('')+(ordered?'</ol>':'</ul>'));
+      continue; }
+    var p=[]; while(i<lines.length && lines[i].trim() && !/^\s*```/.test(lines[i]) && !/^#{1,6}\s/.test(lines[i]) &&
+                   !/^\s*>/.test(lines[i]) && !/^\s*([-*+]|\d+[.)])\s+/.test(lines[i]) && !isTable(i)) p.push(lines[i++]);
+    if(!p.length){ p.push(lines[i++]); }
+    out.push('<p>'+p.map(mdInline).join('<br>')+'</p>');
+  }
+  return out.join('');
+}
+
+// ======================= sessions / sidebar state =======================
 function statusClass(s){ if(!s.live) return 'stop'; if(s.state==='waiting') return 'wait';
   if(s.state==='working') return 'work'; return 'live'; }
-// Label: Claude's own session title (same string as the browser tab), else tmux name, else token.
 function dispName(s){ var t=(s.title||'').trim(); return t || s.name || s.token; }
-// Ephemeral scratch sessions (/tmp/claude-scratch*) are throwaway — keep them off the list.
 function visibleRows(rows){ return rows.filter(function(s){ return !/^\/tmp\/claude-scratch/.test(s.cwd||''); }); }
 
 var ROWS=[], BYTOK={};
-var FRAMES={};          // key (token, or "new-N" until the session reports its token) -> {iframe, used}
-var ACTIVE=null;
-var MAXFRAMES=8;        // live terminals kept warm in the background (each holds a websocket)
-var pendSeq=0;
-var CLOSED=JSON.parse(ls('cb.closed')||'{}');   // collapsed folder groups (per browser)
-var framesEl=$('frames');
+var PANES={};          // key (token, or "new-N" until Claude reports the session) -> pane
+var ACTIVE=null;       // active pane key; null -> the "new session" page
+var CHAT_ON=false;     // web chat available on the server
+var MAXCONSOLES=8;     // console iframes kept warm (each holds a websocket + a tmux client)
+var newSeq=0;
+var CLOSED=JSON.parse(ls('cb.closed')||'{}');
+var views=$('views');
 
-// ---------- terminal frames ----------
-function frameId(f){   // the session token the frame is currently showing (index.html keeps ?id= in sync)
-  try{ return new URLSearchParams(f.iframe.contentWindow.location.search).get('id') || ''; }catch(e){ return ''; }
+// ======================= chat transport: one multiplexed websocket =======================
+var WS=null, WSOPEN=false, WIRE={}, wsRetry=0;
+function wsConnect(){
+  if(!CHAT_ON) return;
+  var url=(location.protocol==='https:'?'wss:':'ws:')+'//'+location.host+location.pathname.replace(/[^/]*$/,'')+'chat/ws';
+  WS=new WebSocket(url);
+  WS.onopen=function(){ WSOPEN=true; wsRetry=0;
+    Object.keys(WIRE).forEach(function(w){ var p=WIRE[w]; if(p.mode==='chat') openChat(p); }); };
+  WS.onmessage=function(e){ var o; try{ o=JSON.parse(e.data); }catch(_){ return; } var p=WIRE[o.key]; if(p) onEvent(p,o); };
+  WS.onclose=function(){ WSOPEN=false; setTimeout(wsConnect, Math.min(4000, 300*(++wsRetry))); };
 }
-function focusActive(){
-  var f=FRAMES[ACTIVE]; if(!f) return;
-  try{
-    var w=f.iframe.contentWindow; w.focus();
-    var ta=w.document.querySelector('.xterm-helper-textarea'); if(ta) ta.focus();
-  }catch(e){}
-}
-function evict(){
-  var keys=Object.keys(FRAMES); if(keys.length<=MAXFRAMES) return;
-  keys.filter(function(k){ return k!==ACTIVE; })
-      .sort(function(a,b){ return FRAMES[a].used-FRAMES[b].used; })
-      .slice(0, keys.length-MAXFRAMES)
-      .forEach(dropFrame);
-}
-function dropFrame(k){ var f=FRAMES[k]; if(!f) return; f.iframe.remove(); delete FRAMES[k]; if(ACTIVE===k) ACTIVE=null; }
+function wsSend(o){ if(WSOPEN){ try{ WS.send(JSON.stringify(o)); return true; }catch(_){} } return false; }
 
-function activate(key, url){
-  var f=FRAMES[key];
-  if(!f){
-    var ifr=document.createElement('iframe');
-    ifr.setAttribute('allow','clipboard-read; clipboard-write');
-    ifr.src=url;
-    ifr.addEventListener('load', function(){ if(ACTIVE===key || FRAMES[ACTIVE]===f) focusActive(); });
-    framesEl.appendChild(ifr);
-    f=FRAMES[key]={iframe:ifr, used:0};
-  }
-  f.used=Date.now(); ACTIVE=key;
-  Object.keys(FRAMES).forEach(function(k){ FRAMES[k].iframe.classList.toggle('on', k===key); });
+// ======================= panes =======================
+function makePane(key, opts){
+  var p={key:key, wire:key, token:opts.token||null, cwd:opts.cwd||'', mode:opts.mode, used:Date.now(),
+         state:'stopped', info:{}, iframe:null, el:null, consoleActive:false, perms:{}};
+  PANES[key]=p; WIRE[p.wire]=p;
+  return p;
+}
+function buildChat(p){
+  if(p.el) return;
+  var c=el('div','chat');
+  c.innerHTML='<div class="log"><div class="inner"></div></div>'+
+    '<div class="composer"><div class="wrap"><div class="banners"></div><div class="perms"></div>'+
+    '<div class="box"><textarea rows="1" placeholder="Message Claude…"></textarea>'+
+    '<div class="bar"><select title="Permission mode"><option value="default">Ask before edits</option>'+
+    '<option value="acceptEdits">Accept edits</option><option value="plan">Plan mode</option><option value="auto">Auto</option></select>'+
+    '<span class="stat"><i></i><span></span></span>'+
+    '<button class="sendbtn stopbtn hidden" type="button" title="Stop (Esc)">■</button>'+
+    '<button class="sendbtn go" type="button" title="Send (Enter)" disabled>↑</button></div></div></div></div>';
+  views.appendChild(c);
+  p.el=c; p.log=c.querySelector('.log'); p.inner=c.querySelector('.inner');
+  p.ta=c.querySelector('textarea'); p.go=c.querySelector('.go'); p.stopb=c.querySelector('.stopbtn');
+  p.stat=c.querySelector('.stat'); p.sel=c.querySelector('select');
+  p.banners=c.querySelector('.banners'); p.permsEl=c.querySelector('.perms');
+  p.r={tools:{}, live:[], seen:{}};
+  function grow(){ p.ta.style.height='auto'; p.ta.style.height=Math.min(p.ta.scrollHeight, innerHeight*0.4)+'px';
+    p.go.disabled=!p.ta.value.trim(); }
+  p.ta.addEventListener('input', grow);
+  p.ta.addEventListener('keydown', function(e){
+    if(e.key==='Enter' && !e.shiftKey && !e.isComposing){ e.preventDefault(); send(p); }
+    else if(e.key==='Escape' && (p.state==='running'||p.state==='requires_action')){ e.preventDefault(); wsSend({op:'interrupt', key:p.wire}); }
+  });
+  p.go.addEventListener('click', function(){ send(p); });
+  p.stopb.addEventListener('click', function(){ wsSend({op:'interrupt', key:p.wire}); });
+  p.sel.addEventListener('change', function(){ wsSend({op:'mode', key:p.wire, mode:p.sel.value}); });
+  if(!p.token) p.ta.placeholder='Message Claude in '+base(p.cwd)+'…';
+  renderStatus(p);
+}
+function openChat(p){
+  buildChat(p); p.ready=false;          // until the history arrives, sends are queued (it redraws the log)
+  var o={op:'open', key:p.wire}; if(p.token) o.token=p.token; else o.cwd=p.cwd;
+  wsSend(o);
+}
+function send(p){
+  var t=p.ta.value; if(!t.trim()) return;
+  if(!p.ready){ (p.queue=p.queue||[]).push(t); p.ta.value=''; p.go.disabled=true; return; }
+  if(!wsSend({op:'send', key:p.wire, text:t})){ note(p,'Not connected to the server — retrying…',true); return; }
+  p.ta.value=''; p.ta.style.height='auto'; p.go.disabled=true;
+  var hint=p.inner.querySelector('.note.hint'); if(hint) hint.remove();
+  if(!p.firstText) p.firstText=t.replace(/\s+/g,' ').trim().slice(0,80);
+  addUser(p, t, true); scrollEnd(p, true);
+  if(p.state==='stopped'||p.state==='idle') setState(p,'starting');
+}
+
+function activate(key){
+  var p=PANES[key]; if(!p) return;
+  ACTIVE=key; p.used=Date.now();
+  if(p.mode==='console') ensureIframe(p); else { if(!p.el) openChat(p); }
+  Object.keys(PANES).forEach(function(k){ var q=PANES[k];
+    if(q.el) q.el.classList.toggle('on', k===key && q.mode==='chat');
+    if(q.iframe) q.iframe.classList.toggle('on', k===key && q.mode==='console'); });
   $('blank').classList.add('hidden');
   evict(); syncUrl(); renderList(true); renderTop();
   $('app').classList.remove('drawer');
   setTimeout(focusActive, 0);
 }
-function openSession(tok){ if(tok) activate(tok, 'term/?id='+encodeURIComponent(tok)); }
-function newSession(){ activate('new-'+(++pendSeq), 'term/?new='); }   // Claude names it via its own title
+function focusActive(){
+  var p=PANES[ACTIVE]; if(!p) return;
+  if(p.mode==='chat'){ if(p.ta && innerWidth>760) p.ta.focus(); return; }
+  try{ var w=p.iframe.contentWindow; w.focus(); var ta=w.document.querySelector('.xterm-helper-textarea'); if(ta) ta.focus(); }catch(e){}
+}
+function ensureIframe(p){
+  if(p.iframe) return;
+  var f=document.createElement('iframe');
+  f.setAttribute('allow','clipboard-read; clipboard-write');
+  f.src = p.token ? ('term/?id='+encodeURIComponent(p.token)) : 'term/?new=';
+  f.addEventListener('load', function(){ if(PANES[ACTIVE]===p) focusActive(); });
+  views.appendChild(f); p.iframe=f;
+}
+function dropIframe(p){ if(p.iframe){ p.iframe.remove(); p.iframe=null; } }
+function evict(){
+  var cons=Object.keys(PANES).filter(function(k){ return PANES[k].iframe && k!==ACTIVE; });
+  if(cons.length<MAXCONSOLES) return;
+  cons.sort(function(a,b){ return PANES[a].used-PANES[b].used; }).slice(0, cons.length-MAXCONSOLES+1)
+      .forEach(function(k){ var p=PANES[k]; dropIframe(p); if(p.mode==='console' && !p.token) dropPane(p); });
+}
+function dropPane(p){
+  dropIframe(p); if(p.el){ p.el.remove(); }
+  if(p.mode==='chat') wsSend({op:'close', key:p.wire});
+  delete WIRE[p.wire]; delete PANES[p.key]; if(ACTIVE===p.key) ACTIVE=null;
+}
+function rekey(p, tok){
+  if(!tok || p.key===tok) { p.token=tok||p.token; return; }
+  if(PANES[tok] && PANES[tok]!==p) dropPane(PANES[tok]);
+  delete PANES[p.key]; if(ACTIVE===p.key) ACTIVE=tok;
+  p.key=tok; p.token=tok; PANES[tok]=p;
+  syncUrl(); renderList(true); renderTop();
+}
+// Console frames keep ?id= in sync with their session (index.html): follow /clear and new sessions.
+function followConsoles(){
+  Object.keys(PANES).forEach(function(k){ var p=PANES[k]; if(!p.iframe) return;
+    var id=''; try{ id=new URLSearchParams(p.iframe.contentWindow.location.search).get('id')||''; }catch(e){}
+    if(id && id!==p.token) rekey(p,id); });
+}
 
+function openSession(tok){
+  if(!tok) return;
+  if(PANES[tok]){ activate(tok); return; }
+  var s=BYTOK[tok];
+  var mode = (!CHAT_ON || (s && s.live && s.mode==='console')) ? 'console' : 'chat';
+  makePane(tok, {token:tok, cwd:s&&s.cwd, mode:mode});
+  activate(tok);
+}
+function newChat(cwd){
+  var key='new-'+(++newSeq);
+  makePane(key, {cwd:cwd, mode:'chat'}); activate(key);
+}
+function newConsole(){ var key='new-'+(++newSeq); makePane(key,{mode:'console'}); activate(key); }
+function showBlank(){
+  ACTIVE=null; Object.keys(PANES).forEach(function(k){ var q=PANES[k];
+    if(q.el) q.el.classList.remove('on'); if(q.iframe) q.iframe.classList.remove('on'); });
+  $('blank').classList.remove('hidden'); syncUrl(); renderList(true); renderTop(); loadDirs();
+  $('app').classList.remove('drawer');
+}
+
+// ---------- mode switching (one owner per session: chat process XOR console tmux) ----------
+function toConsole(p){
+  if(p.mode==='console' || !p.token) return;
+  if((p.state==='running'||p.state==='requires_action') &&
+     !confirm('Claude is working in this session. Stop it and switch to the console?')) return;
+  if(p.state==='running'||p.state==='requires_action') wsSend({op:'interrupt', key:p.wire});
+  p.switching='console'; wsSend({op:'release', key:p.wire}); renderTop();
+}
+function toChat(p){
+  if(p.mode==='chat' || !CHAT_ON) return;
+  if(!p.token){ alert('Send a first message in the console so the session gets saved, then switch.'); return; }
+  // Drop the frame BEFORE the takeover: a live frame would reconnect and resume the console again.
+  dropIframe(p); p.mode='chat'; p.switching='chat';
+  if(!p.el) buildChat(p);
+  var o={op:'open', key:p.wire, token:p.token}; wsSend(o);
+  wsSend({op:'takeover', key:p.wire});
+  activate(p.key);
+}
+
+// ======================= chat rendering =======================
+function nearEnd(p){ return p.log.scrollHeight-p.log.scrollTop-p.log.clientHeight < 80; }
+function scrollEnd(p, force){ if(force || p.stick) p.log.scrollTop=p.log.scrollHeight; }
+function before(p){ p.stick=nearEnd(p); }
+function addUser(p, text, local){
+  var d=el('div','msg user'); var b=el('div','b'); b.textContent=text; d.appendChild(b); p.inner.appendChild(d);
+  if(local) p.r.pendingEcho=(p.r.pendingEcho||[]).concat([text.trim()]);
+}
+function note(p, html, err){ before(p); p.inner.appendChild(el('div','note'+(err?' err':''), html)); scrollEnd(p); }
+
+function toolSummary(name, inp){
+  inp=inp||{};
+  var v = inp.command || inp.file_path || inp.notebook_path || inp.pattern || inp.url || inp.query ||
+          inp.description || inp.prompt || inp.skill || '';
+  if(name==='TodoWrite' && inp.todos) v=inp.todos.length+' items';
+  if(!v){ try{ v=JSON.stringify(inp); }catch(e){ v=''; } }
+  return String(v).split('\n')[0].slice(0,200);
+}
+function diffHtml(oldS, newS){
+  var h='';
+  String(oldS||'').split('\n').forEach(function(l){ h+='<div class="d">- '+esc(l)+'</div>'; });
+  String(newS||'').split('\n').forEach(function(l){ h+='<div class="a">+ '+esc(l)+'</div>'; });
+  return '<pre class="diff">'+h+'</pre>';
+}
+function toolBody(name, inp){
+  inp=inp||{};
+  if(name==='Edit') return diffHtml(inp.old_string, inp.new_string);
+  if(name==='MultiEdit' && inp.edits) return inp.edits.map(function(e){ return diffHtml(e.old_string,e.new_string); }).join('');
+  if(name==='Write') return '<pre>'+esc(String(inp.content||'').slice(0,20000))+'</pre>';
+  if(name==='Bash') return '<pre>$ '+esc(inp.command||'')+'</pre>';
+  if(name==='TodoWrite' && inp.todos) return '<pre>'+esc(inp.todos.map(function(t){
+    return (t.status==='completed'?'☑ ':t.status==='in_progress'?'◐ ':'☐ ')+(t.content||''); }).join('\n'))+'</pre>';
+  var j=''; try{ j=JSON.stringify(inp,null,2); }catch(e){}
+  return '<pre>'+esc(j)+'</pre>';
+}
+function addTool(p, b){
+  var d=el('details','tool pending');
+  d.innerHTML='<summary><span class="tn">'+esc(b.name)+'</span><span class="ts">'+esc(toolSummary(b.name,b.input))+'</span></summary>'+
+              '<div class="body">'+toolBody(b.name,b.input)+'</div>';
+  if(b.name==='TodoWrite') d.open=true;
+  p.inner.appendChild(d); p.r.tools[b.id]=d;
+}
+function resultText(c){
+  if(typeof c==='string') return c;
+  if(Array.isArray(c)) return c.map(function(x){ return x.type==='text'?x.text:(x.type==='image'?'[image]':''); }).join('\n');
+  return '';
+}
+function addToolResult(p, b){
+  var d=p.r.tools[b.tool_use_id]; if(!d) return;
+  d.classList.remove('pending'); if(b.is_error) d.classList.add('err');
+  var t=resultText(b.content); if(!t) return;
+  var body=d.querySelector('.body');
+  body.insertAdjacentHTML('beforeend','<div class="lbl">'+(b.is_error?'error':'result')+'</div><pre class="res">'+
+    esc(t.length>20000?t.slice(0,20000)+'\n… ('+t.length+' chars)':t)+'</pre>');
+}
+// user-side text: hide harness wrappers, show slash commands and local command output
+function userTextHtml(p, t){
+  var cmd=/<command-name>([\s\S]*?)<\/command-name>/.exec(t);
+  if(cmd){ var args=/<command-args>([\s\S]*?)<\/command-args>/.exec(t); addUser(p, cmd[1].trim()+(args&&args[1].trim()?' '+args[1].trim():'')); return; }
+  var out=/<local-command-stdout>([\s\S]*?)<\/local-command-stdout>/.exec(t);
+  if(out){ if(out[1].trim()) p.inner.appendChild(el('div','note','<pre>'+esc(out[1].trim())+'</pre>')); return; }
+  if(/^\s*</.test(t) || /^Caveat:/.test(t)) return;
+  // our own optimistic echo arrives back from the SDK — don't print it twice
+  var pe=p.r.pendingEcho||[]; var ix=pe.indexOf(t.trim());
+  if(ix>=0){ pe.splice(ix,1); return; }
+  addUser(p, t);
+}
+function renderItem(p, m){
+  if(!m || m.parent_tool_use_id) return;              // subagent internals stay inside the Task row
+  if(m.uuid){ if(p.r.seen[m.uuid]) return; p.r.seen[m.uuid]=1; }
+  var msg=m.message||{}, c=msg.content;
+  if(m.type==='user'){
+    if(typeof c==='string'){ userTextHtml(p,c); return; }
+    (c||[]).forEach(function(b){
+      if(b.type==='tool_result') addToolResult(p,b);
+      else if(b.type==='text') userTextHtml(p,b.text||'');
+      else if(b.type==='image') addUser(p,'[image]');
+    });
+    return;
+  }
+  if(m.type==='assistant'){
+    (Array.isArray(c)?c:[]).forEach(function(b){
+      if(b.type==='text'){
+        var live=p.r.live.shift();
+        if(live){ live.classList.remove('live'); live.innerHTML=md(b.text); }
+        else p.inner.appendChild(el('div','msg asst', md(b.text)));
+      } else if(b.type==='tool_use') addTool(p,b);
+      else if(b.type==='thinking' && b.thinking) p.inner.appendChild(el('div','thinking', esc(b.thinking)));
+    });
+    if(m.error) p.inner.appendChild(el('div','note err', esc('API error: '+m.error)));
+  }
+}
+var rafPending={};
+function onStream(p, m){
+  if(m.parent_tool_use_id) return;
+  var ev=m.event||{};
+  if(ev.type==='content_block_start' && ev.content_block && ev.content_block.type==='text'){
+    var d=el('div','msg asst live'); d._txt=''; p.inner.appendChild(d); p.r.live.push(d); p.r.cur=d;
+  } else if(ev.type==='content_block_delta' && ev.delta && ev.delta.type==='text_delta' && p.r.cur){
+    var cur=p.r.cur; cur._txt+=ev.delta.text;
+    if(!cur._raf){ cur._raf=requestAnimationFrame(function(){ cur._raf=0; if(!cur.classList.contains('live')) return;
+      before(p); cur.innerHTML=md(cur._txt)+'<span class="cursor"></span>'; scrollEnd(p); }); }
+  } else if(ev.type==='content_block_stop'){ p.r.cur=null; }
+}
+function finishLive(p){ p.r.live.forEach(function(d){ d.classList.remove('live'); d.innerHTML=md(d._txt||''); }); p.r.live=[]; p.r.cur=null; }
+
+function setState(p, st){ p.state=st; renderStatus(p); if(PANES[ACTIVE]===p) renderTop(); }
+function renderStatus(p){
+  if(!p.stat) return;
+  var st=p.state, cls={running:'run',starting:'run',requires_action:'wait',idle:'idle'}[st]||'';
+  var lbl={running:'working…',starting:'starting…',requires_action:'needs your answer',idle:'ready',stopped:'not running — send a message to resume'}[st]||st;
+  if(!p.token && st==='stopped') lbl='new session in '+(p.cwd||'');
+  var bits=[lbl]; if(p.info.model) bits.push(p.info.model.replace(/^claude-/,''));
+  if(p.info.cost!=null) bits.push('$'+Number(p.info.cost).toFixed(2));
+  p.stat.className='stat '+cls; p.stat.querySelector('span').textContent=bits.join(' · ');
+  p.stopb.classList.toggle('hidden', !(st==='running'||st==='requires_action'||st==='starting'));
+  if(p.info.permissionMode && p.sel.value!==p.info.permissionMode) p.sel.value=p.info.permissionMode;
+}
+
+// ---------- permission / question cards ----------
+function renderPerm(p, r){
+  var box=el('div','perm'); box.dataset.id=r.id;
+  if(r.tool==='AskUserQuestion' && r.input && r.input.questions){
+    var h='<div class="h">Claude has a question</div>';
+    r.input.questions.forEach(function(q,qi){
+      h+='<div class="q" data-q="'+qi+'"><div class="qt">'+esc(q.question)+'</div><div class="opts">';
+      (q.options||[]).forEach(function(o,oi){
+        h+='<label class="opt"><input type="'+(q.multiSelect?'checkbox':'radio')+'" name="q'+r.id+'_'+qi+'" value="'+esc(o.label)+'"'+(oi===0&&!q.multiSelect?' checked':'')+'>'+
+           '<span>'+esc(o.label)+(o.description?'<small>'+esc(o.description)+'</small>':'')+'</span></label>';
+      });
+      h+='<input type="text" placeholder="Other (optional)"></div></div>';
+    });
+    h+='<div class="acts"><button class="btn" data-a="answer">Submit</button><button class="btn ghost" data-a="deny">Skip</button></div>';
+    box.innerHTML=h;
+  } else {
+    box.innerHTML='<div class="h">Allow '+esc(r.tool)+'?</div>'+(r.reason?'<div>'+esc(r.reason)+'</div>':'')+
+      '<div>'+toolBody(r.tool, r.input)+'</div><div class="acts"><button class="btn" data-a="allow">Allow</button>'+
+      (r.suggestions?'<button class="btn ghost" data-a="always">Always allow</button>':'')+
+      '<button class="btn ghost" data-a="deny">Deny</button></div>';
+  }
+  box.addEventListener('click', function(e){
+    var a=e.target.closest('button'); if(!a) return; a=a.dataset.a;
+    var msg={op:'perm', key:p.wire, id:r.id};
+    if(a==='answer'){
+      var ans={};
+      r.input.questions.forEach(function(q,qi){
+        var qd=box.querySelector('.q[data-q="'+qi+'"]');
+        var vals=[].slice.call(qd.querySelectorAll('input:checked')).map(function(x){ return x.value; });
+        var other=qd.querySelector('input[type=text]').value.trim(); if(other) vals=q.multiSelect?vals.concat([other]):[other];
+        ans[q.question]=vals.join(', ');
+      });
+      msg.answers=ans; msg.allow=true;
+    } else { msg.allow=(a==='allow'||a==='always'); msg.always=(a==='always'); }
+    wsSend(msg); box.remove();
+  });
+  p.permsEl.appendChild(box); p.perms[r.id]=box;
+}
+
+function renderBanner(p){
+  p.banners.innerHTML='';
+  if(p.consoleActive){
+    var b=el('div','banner','<span>This session is open in the <b>console</b> right now. Chatting here will close the console.</span>');
+    var go=el('button','btn','Use chat'); go.type='button';
+    go.onclick=function(){ wsSend({op:'takeover', key:p.wire}); };
+    var c=el('button','btn ghost','Open console'); c.type='button';
+    c.onclick=function(){ p.mode='console'; activate(p.key); };
+    b.appendChild(go); b.appendChild(c); p.banners.appendChild(b);
+  }
+}
+
+function onEvent(p, o){
+  switch(o.ev){
+    case 'history':
+      p.inner.innerHTML=''; p.r={tools:{}, live:[], seen:{}, pendingEcho:[]}; p.permsEl.innerHTML=''; p.perms={};
+      (o.items||[]).forEach(function(m){ renderItem(p,m); });
+      if(!o.items || !o.items.length) p.inner.appendChild(el('div','note hint', p.token?'(empty session)':'Start the conversation below.'));
+      p.info=o.info||{}; p.consoleActive=!!o.console; renderBanner(p);
+      (o.perms||[]).forEach(function(r){ renderPerm(p,r); });
+      if(o.token && o.token!==p.token) rekey(p,o.token);
+      setState(p, o.state||'stopped');
+      p.ready=true;
+      (p.queue||[]).splice(0).forEach(function(t){ p.ta.value=t; send(p); });
+      requestAnimationFrame(function(){ scrollEnd(p,true); });
+      break;
+    case 'msg':
+      before(p);
+      var m=o.m;
+      if(m.type==='stream_event') onStream(p,m);
+      else if(m.type==='result'){
+        finishLive(p);
+        if(m.subtype && m.subtype!=='success') note(p, esc('Turn ended: '+m.subtype.replace(/_/g,' ')), true);
+      } else if(m.type==='system'){
+        if(m.subtype==='local_command_output' && m.content) p.inner.appendChild(el('div','note','<pre>'+esc(m.content)+'</pre>'));
+        if(m.subtype==='compact_boundary') p.inner.appendChild(el('div','note','— context compacted —'));
+      } else renderItem(p,m);
+      scrollEnd(p);
+      break;
+    case 'state': setState(p, o.state); if(o.state==='stopped'||o.state==='idle') finishLive(p); break;
+    case 'info': p.info=o.info||{}; renderStatus(p); break;
+    case 'token': rekey(p, o.token); break;
+    case 'perm': renderPerm(p,o); before(p); scrollEnd(p); break;
+    case 'perm_done': if(p.perms[o.id]){ p.perms[o.id].remove(); delete p.perms[o.id]; } break;
+    case 'error': note(p, esc(o.text), true); if(p.state==='starting') setState(p,'stopped'); break;
+    case 'released':
+      if(p.switching==='console'){ p.switching=null; p.mode='console'; activate(p.key); }
+      break;
+    case 'console':
+      p.consoleActive=!!o.active; renderBanner(p); p.switching=null;
+      wsSend({op:'open', key:p.wire, token:p.token});   // refresh history written by the console
+      break;
+  }
+}
+
+// ======================= top bar =======================
+function renderTop(){
+  var p=PANES[ACTIVE], ttl=$('ttl'), pop=$('popout'), seg=$('modeseg');
+  if(!p){ ttl.textContent='New session'; pop.classList.add('hidden'); seg.classList.add('hidden'); document.title='claude-box'; return; }
+  var s=BYTOK[p.token];
+  var name = s ? dispName(s) : (p.firstText || 'New session');
+  ttl.innerHTML=esc(name)+((s&&s.cwd)||p.cwd ? '<span class="cwd">'+esc((s&&s.cwd)||p.cwd)+'</span>' : '');
+  seg.classList.toggle('hidden', !CHAT_ON);
+  [].forEach.call(seg.querySelectorAll('button'), function(b){
+    b.classList.toggle('on', b.dataset.m===p.mode);
+    b.disabled = !!p.switching || (b.dataset.m==='console' ? !p.token : !CHAT_ON);
+  });
+  var t=name;
+  if(p.mode==='console' && p.iframe){ try{ t=p.iframe.contentDocument.title||name; }catch(e){} }
+  else { var mk={running:'⏳ ',starting:'⏳ ',requires_action:'🟡 '}[p.state]||''; t=mk+name; }
+  document.title=t;
+  if(p.token){ pop.href='term/?id='+encodeURIComponent(p.token); pop.classList.remove('hidden'); } else pop.classList.add('hidden');
+}
+$('modeseg').addEventListener('click', function(e){
+  var b=e.target.closest('button'); var p=PANES[ACTIVE]; if(!b||!p||b.disabled) return;
+  if(b.dataset.m==='console') toConsole(p); else toChat(p);
+});
 function syncUrl(){
   var q = (ACTIVE && !/^new-/.test(ACTIVE)) ? ('?s='+encodeURIComponent(ACTIVE)) : '';
   try{ history.replaceState(null,'',location.pathname+q); }catch(e){}
 }
-// A frame's token can change under us: a new session gets its token after the first prompt,
-// and /clear starts a new Claude session (new token) in the same tmux pane. Re-key frames.
-function rekeyFrames(){
-  Object.keys(FRAMES).forEach(function(k){
-    var id=frameId(FRAMES[k]);
-    if(!id || id===k) return;
-    if(FRAMES[id]){ if(ACTIVE===k){ activate(id); } dropFrame(k); return; }
-    FRAMES[id]=FRAMES[k]; delete FRAMES[k];
-    if(ACTIVE===k){ ACTIVE=id; syncUrl(); }
-  });
-}
 
-function renderTop(){
-  var s=BYTOK[ACTIVE], ttl=$('ttl'), pop=$('popout');
-  if(!ACTIVE){ ttl.textContent=''; pop.classList.add('hidden'); document.title='claude-box'; return; }
-  var name = s ? dispName(s) : 'New session';
-  ttl.innerHTML=esc(name)+(s&&s.cwd?'<span class="cwd">'+esc(s.cwd)+'</span>':'');
-  var f=FRAMES[ACTIVE], t='';
-  try{ t=f.iframe.contentDocument.title; }catch(e){}
-  document.title = t || name;                    // carries the 🟢/🟡/⏳ marker of the active session
-  if(!/^new-/.test(ACTIVE)){ pop.href='term/?id='+encodeURIComponent(ACTIVE); pop.classList.remove('hidden'); }
-  else pop.classList.add('hidden');
-}
-
-// ---------- sidebar list ----------
+// ======================= sidebar =======================
 var LISTSIG='';
+var RECENT_SEC=3*86400;
 function renderList(force){
-  var rows=ROWS;
-  var pend=Object.keys(FRAMES).filter(function(k){ return !BYTOK[k]; });   // open but not in the registry yet
-  var sig=JSON.stringify([ACTIVE,pend,CLOSED,Object.keys(FRAMES).sort(),rows.map(function(s){
-    return [s.token,statusClass(s),dispName(s),s.cwd,fmt(s.lastActivity)]; })]);
+  var rows=ROWS, now=Date.now()/1000;
+  var pend=Object.keys(PANES).filter(function(k){ return /^new-/.test(k); });
+  var sig=JSON.stringify([ACTIVE,pend,CLOSED,rows.map(function(s){
+    return [s.token,statusClass(s),dispName(s),s.cwd,fmt(s.lastActivity),s.mode]; })]);
   if(!force && sig===LISTSIG) return; LISTSIG=sig;
-
-  var live=rows.filter(function(s){ return s.live; }), dead=rows.filter(function(s){ return !s.live; });
-  $('scount').textContent = live.length+' running · '+dead.length+' stopped';
+  var recent=rows.filter(function(s){ return s.live || now-(s.lastActivity||0)<RECENT_SEC; });
+  var old=rows.filter(function(s){ return !(s.live || now-(s.lastActivity||0)<RECENT_SEC); });
+  $('scount').textContent = rows.filter(function(s){return s.live;}).length+' running · '+rows.length+' total';
   var h='';
-  pend.forEach(function(k){
+  pend.forEach(function(k){ var p=PANES[k];
     h+='<div class="row pend'+(k===ACTIVE?' active':'')+'" data-key="'+esc(k)+'"><span class="dot"></span>'+
-       '<span class="nm">New session…</span></div>';
-  });
-  // running sessions grouped by folder; folders ordered by their most recent activity
+       '<span class="nm">New session'+(p.cwd?' · '+esc(base(p.cwd)):'')+'</span></div>'; });
   var groups={}, order=[];
-  live.forEach(function(s){ var k=s.cwd||''; if(!groups[k]){ groups[k]=[]; order.push(k); } groups[k].push(s); });
+  recent.forEach(function(s){ var k=s.cwd||''; if(!groups[k]){ groups[k]=[]; order.push(k); } groups[k].push(s); });
   order.sort(function(a,b){ return mx(groups[b])-mx(groups[a]); });
   order.forEach(function(k){ h+=group('d:'+k, base(k), k, groups[k]); });
-  if(dead.length) h+=group('stopped', 'Stopped', 'click one to resume it', dead, true);
+  if(old.length) h+=group('older', 'Older', 'inactive for more than 3 days', old, true);
   if(!rows.length && !pend.length) h='<div class="empty">No sessions yet — start a new one above.</div>';
   $('list').innerHTML=h;
 }
@@ -290,70 +738,82 @@ function group(id, label, tip, arr, defClosed){
   if(closed) return h;
   arr.forEach(function(s){
     var cls=statusClass(s), dn=dispName(s);
-    h+='<a class="row '+cls+(s.token===ACTIVE?' active':'')+'" href="term/?id='+encodeURIComponent(s.token)+
+    h+='<a class="row '+cls+(s.token===ACTIVE?' active':'')+'" href="?s='+encodeURIComponent(s.token)+
        '" data-key="'+esc(s.token)+'" title="'+esc(dn+(s.cwd?'\n'+s.cwd:''))+'">'+
        '<span class="dot"></span><span class="nm">'+esc(dn)+'</span>'+
-       (FRAMES[s.token]&&s.token!==ACTIVE?'<span class="open" title="open in background"></span>':'')+
+       (s.live&&s.mode==='console'?'<span class="tag" title="open in the console">&gt;_</span>':'')+
        '<span class="when">'+fmt(s.lastActivity)+'</span>'+
        '<button class="del" type="button" title="Delete session" aria-label="Delete session">✕</button></a>';
   });
   return h;
 }
-
 $('list').addEventListener('click', function(e){
   var g=e.target.closest('.grp');
   if(g){ var id=g.getAttribute('data-grp'); CLOSED[id]=!g.classList.contains('closed');
          ls('cb.closed', JSON.stringify(CLOSED)); renderList(true); return; }
   var row=e.target.closest('.row'); if(!row) return;
-  // keep the normal link behavior for ctrl/cmd/middle click (open in a new tab)
-  if(e.metaKey||e.ctrlKey||e.shiftKey||e.button===1) return;
+  if(e.metaKey||e.ctrlKey||e.shiftKey||e.button===1) return;     // open in a new tab
   e.preventDefault();
   var key=row.getAttribute('data-key');
   if(e.target.closest('.del')){ delSession(key); return; }
-  if(FRAMES[key]) activate(key); else openSession(key);
+  if(PANES[key]) activate(key); else openSession(key);
 });
-
 function delSession(tok){
   var s=BYTOK[tok]; var dn=s?dispName(s):tok;
   if(!confirm('Delete session "'+dn+'"?'+(s&&s.live?' It is running — it will be stopped.':''))) return;
+  if(PANES[tok]) dropIframe(PANES[tok]);
   fetch('delete?id='+encodeURIComponent(tok),{method:'POST'})
     .then(function(r){ return r.ok?r.json():null; })
     .then(function(p){
       if(!(p&&p.ok)){ alert('Failed to delete session'); return; }
-      var wasActive=(ACTIVE===tok); dropFrame(tok);
-      if(wasActive){ $('blank').classList.remove('hidden'); syncUrl(); renderTop(); }
+      var was=(ACTIVE===tok); if(PANES[tok]) dropPane(PANES[tok]);
+      if(was) showBlank();
       tick();
     }).catch(function(){ alert('Failed to delete session'); });
 }
 
-// ---------- polling ----------
+// ======================= new-session page =======================
+function loadDirs(){
+  if(!CHAT_ON){ $('dirs').innerHTML='<div class="empty">Web chat is not available on this server — use the console.</div>'; return; }
+  fetch('dirs').then(function(r){ return r.json(); }).then(function(ds){
+    $('dirs').innerHTML=ds.map(function(d){
+      return '<div class="dir" data-p="'+esc(d.path)+'"><b>'+esc(d.name)+'</b><span class="p">'+esc(d.path)+'</span></div>'; }).join('')
+      || '<div class="empty">No folders in the workspace.</div>';
+  }).catch(function(){ $('dirs').innerHTML='<div class="empty">Failed to list folders.</div>'; });
+}
+$('dirs').addEventListener('click', function(e){ var d=e.target.closest('.dir'); if(d) newChat(d.getAttribute('data-p')); });
+$('newconsole').addEventListener('click', newConsole);
+$('newbtn').addEventListener('click', function(){ if(CHAT_ON) showBlank(); else newConsole(); });
+
+// ======================= polling =======================
 function tick(){
   if(document.hidden) return;
-  rekeyFrames();
+  followConsoles();
   fetch('sessions').then(function(r){ return r.ok?r.json():null; }).then(function(rows){
     if(!rows) return;
     ROWS=visibleRows(rows); BYTOK={};
     ROWS.forEach(function(s){ BYTOK[s.token]=s; });
     renderList(); renderTop(); notifyTick(ROWS);
-  }).catch(function(){ /* keep the current view on a transient failure */ });
+  }).catch(function(){});
 }
 setInterval(tick, 2000);
-setInterval(function(){ if(!document.hidden){ rekeyFrames(); renderTop(); } }, 700);   // title marker follows the terminal
-document.addEventListener('visibilitychange', function(){ if(!document.hidden){ tick(); focusActive(); } });
-
-$('newbtn').addEventListener('click', newSession);
-$('blanknew').addEventListener('click', newSession);
+setInterval(function(){ if(!document.hidden){ followConsoles(); if(PANES[ACTIVE]&&PANES[ACTIVE].mode==='console') renderTop(); } }, 800);
+document.addEventListener('visibilitychange', function(){ if(!document.hidden){ tick(); } });
 $('menubtn').addEventListener('click', function(){ $('app').classList.toggle('drawer'); });
 $('scrim').addEventListener('click', function(){ $('app').classList.remove('drawer'); });
 
-// initial: reopen the session from ?s=<token> (survives a page reload)
-(function(){
+fetch('chat/info').then(function(r){ return r.ok?r.json():{}; }).catch(function(){ return {}; }).then(function(i){
+  CHAT_ON=!!(i&&i.enabled);
+  wsConnect();
   var s=new URLSearchParams(location.search).get('s');
-  tick();
-  if(s) openSession(s); else { renderList(true); $('app').classList.add('drawer'); }
-})();
+  fetch('sessions').then(function(r){ return r.ok?r.json():[]; }).catch(function(){ return []; }).then(function(rows){
+    ROWS=visibleRows(rows||[]); BYTOK={}; ROWS.forEach(function(x){ BYTOK[x.token]=x; });
+    renderList(true);
+    if(s) openSession(s); else { showBlank(); if(innerWidth<=760) $('app').classList.add('drawer'); }
+  });
+});
 
-// ---------- search across the history of all sessions ----------
+// ======================= search =======================
 (function(){
   var qEl=$('q'), scopeEl=$('scope'), resEl=$('results'), listEl=$('list'), seq=0, tmr=null;
   function hl(text,q){
@@ -364,16 +824,6 @@ $('scrim').addEventListener('click', function(){ $('app').classList.remove('draw
   }
   function when(ts){ if(!ts) return ''; var d=new Date(ts); return isNaN(d)?'':d.toLocaleString(); }
   function show(on){ resEl.classList.toggle('hidden',!on); listEl.classList.toggle('hidden',on); $('scopewrap').classList.toggle('hidden',!on); }
-  function renderResults(rows,q){
-    if(!rows.length){ resEl.innerHTML='<div class="empty">Nothing found.</div>'; return; }
-    var h='';
-    rows.forEach(function(s){
-      h+='<div class="result" data-key="'+esc(s.token)+'"><div class="name">'+esc(s.name||s.token)+
-         ' <span class="meta">'+esc(when(s.timestamp))+(s.type==='assistant'?' · Claude':'')+'</span></div>'+
-         '<div class="snip">'+hl(s.snippet||'',q)+'</div></div>';
-    });
-    resEl.innerHTML=h;
-  }
   function doSearch(){
     var q=qEl.value.trim();
     if(q.length<2){ show(false); resEl.innerHTML=''; return; }
@@ -381,20 +831,20 @@ $('scrim').addEventListener('click', function(){ $('app').classList.remove('draw
     var my=++seq, scope=scopeEl.checked?'all':'prompts';
     fetch('search?q='+encodeURIComponent(q)+'&scope='+scope)
       .then(function(r){ if(!r.ok) throw 0; return r.json(); })
-      .then(function(rows){ if(my===seq) renderResults(rows,q); })
+      .then(function(rows){ if(my!==seq) return;
+        resEl.innerHTML = rows.length ? rows.map(function(s){
+          return '<div class="result" data-key="'+esc(s.token)+'"><div class="name">'+esc(s.name||s.token)+
+            ' <span class="meta">'+esc(when(s.timestamp))+(s.type==='assistant'?' · Claude':'')+'</span></div>'+
+            '<div class="snip">'+hl(s.snippet||'',q)+'</div></div>'; }).join('') : '<div class="empty">Nothing found.</div>'; })
       .catch(function(){ if(my===seq) resEl.innerHTML='<div class="empty">Search error.</div>'; });
   }
   qEl.addEventListener('input', function(){ clearTimeout(tmr); tmr=setTimeout(doSearch,350); });
   qEl.addEventListener('keydown', function(e){ if(e.key==='Escape'){ qEl.value=''; doSearch(); focusActive(); } });
   scopeEl.addEventListener('change', function(){ if(qEl.value.trim().length>=2) doSearch(); });
-  resEl.addEventListener('click', function(e){
-    var r=e.target.closest('.result'); if(!r) return;
-    var k=r.getAttribute('data-key'); if(FRAMES[k]) activate(k); else openSession(k);
-  });
+  resEl.addEventListener('click', function(e){ var r=e.target.closest('.result'); if(r) openSession(r.getAttribute('data-key')); });
 })();
 
-// ---------- notifications for ALL sessions (secure context): on state changes ----------
-// The embedded terminals don't notify on their own (see index.html) — only this page does.
+// ======================= notifications for all sessions =======================
 document.addEventListener('pointerdown', function once(){
   try{ if(window.Notification && Notification.permission==='default') Notification.requestPermission(); }catch(e){}
   document.removeEventListener('pointerdown', once);
@@ -405,10 +855,10 @@ function notifyTick(rows){
     var st=s.state, was=NOTIFY_PREV[s.token]; NOTIFY_PREV[s.token]=st;
     if(!window.Notification || Notification.permission!=='granted') return;
     if(was===undefined || st===was || (st!=='done' && st!=='waiting')) return;
-    if(s.token===ACTIVE && document.hasFocus()) return;     // you're looking at it already
+    if(s.token===ACTIVE && document.hasFocus()) return;
     try{ var n=new Notification('claude-box',{
         body:dispName(s)+': '+(st==='waiting'?'🟡 waiting for input':'🟢 done'), tag:'cb-'+s.token});
-      n.onclick=function(){ window.focus(); if(FRAMES[s.token]) activate(s.token); else openSession(s.token); n.close(); };
+      n.onclick=function(){ window.focus(); openSession(s.token); n.close(); };
     }catch(e){}
   });
 }

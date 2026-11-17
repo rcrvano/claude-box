@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # On-disk registry of web sessions (survives a container restart, unlike tmux).
 # Single I/O point: everyone writes/reads only through this helper (flock + jq).
-#   upsert --claude-id <id> --cwd <p> --name <n> --state <s> --tmux <sess>  -> prints token
+#   upsert --claude-id <id> --cwd <p> --name <n> --state <s> --tmux <sess> [--title t] [--mode chat|console] -> token
 #   get <token>   -> JSON of the record (exit 1 if not found)
 #   list          -> JSON array, newest first, with a live field (tmux has-session)
 #   delete <token>-> kill the tmux session (if alive) + erase the record and preview cache
@@ -20,7 +20,7 @@ cmd="${1:-}"; shift || true
 
 case "$cmd" in
   upsert)
-    cid=""; cwd=""; name=""; state=""; tmux=""; title=""
+    cid=""; cwd=""; name=""; state=""; tmux=""; title=""; mode=""
     while [ $# -gt 0 ]; do
       case "$1" in
         --claude-id) cid="$2"; shift 2;;
@@ -29,6 +29,7 @@ case "$cmd" in
         --state)     state="$2"; shift 2;;
         --tmux)      tmux="$2"; shift 2;;
         --title)     title="$2"; shift 2;;
+        --mode)      mode="$2"; shift 2;;       # chat | console (last owner); kept if omitted
         *) shift;;
       esac
     done
@@ -39,9 +40,10 @@ case "$cmd" in
     ts="$(date +%s)"
     tmp="$(mktemp)"
     jq --arg t "$token" --arg c "$cid" --arg cwd "$cwd" --arg n "$name" \
-       --arg s "$state" --arg tm "$tmux" --arg ti "$title" --argjson ts "$ts" \
+       --arg s "$state" --arg tm "$tmux" --arg ti "$title" --arg mo "$mode" --argjson ts "$ts" \
        '.[$t] = {token:$t, claudeSessionId:$c, cwd:$cwd, name:$n, state:$s, tmuxSession:$tm,
                  title: (if ($ti|length)>0 then $ti else (.[$t].title // "") end),
+                 mode: (if ($mo|length)>0 then $mo else (.[$t].mode // "") end),
                  lastActivity:$ts}' \
        "$REG" > "$tmp" && mv "$tmp" "$REG"
     printf '%s' "$token"

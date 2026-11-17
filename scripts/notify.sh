@@ -11,6 +11,10 @@ set -uo pipefail
 
 state="${1:-done}"
 
+# Sessions driven by the web chat (Agent SDK, see web-chat.js) have no tmux pane or tty;
+# the chat module keeps their registry records itself. Nothing to do here.
+[ -n "${CLAUDE_WEB_CHAT:-}" ] && exit 0
+
 # IMPORTANT (multi-tab): we resolve the session/window of EXACTLY the pane where the hook fired.
 # The hook inherits $TMUX_PANE from Claude. Without -t "$TMUX_PANE", tmux takes the "current"
 # session of the active client (the last active tab) → the signal would go to the wrong tab.
