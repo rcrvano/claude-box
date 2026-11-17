@@ -25,29 +25,36 @@ RUN apt-get update \
 # Grafana MCP (mcp-grafana) — a Go binary for MCP (Loki/Prometheus/dashboards).
 # Credentials are taken from ENV (GRAFANA_URL + GRAFANA_SERVICE_ACCOUNT_TOKEN), see claude-defaults/mcp.json.
 # The version is pinned (rather than latest via api.github.com) — otherwise rate-limit/504 from the GitHub API breaks the build.
+# Architecture of the image being built (set by BuildKit: amd64 | arm64). The binaries below
+# are fetched for it, so the image also builds natively on ARM hosts (Apple Silicon, Graviton).
+ARG TARGETARCH
 ARG MCP_GRAFANA_VERSION=v0.16.0
-RUN curl -fsSL --retry 5 --retry-all-errors "https://github.com/grafana/mcp-grafana/releases/download/${MCP_GRAFANA_VERSION}/mcp-grafana_Linux_x86_64.tar.gz" \
+RUN case "${TARGETARCH:-amd64}" in arm64) a=arm64 ;; *) a=x86_64 ;; esac \
+ && curl -fsSL --retry 5 --retry-all-errors "https://github.com/grafana/mcp-grafana/releases/download/${MCP_GRAFANA_VERSION}/mcp-grafana_Linux_${a}.tar.gz" \
       | tar -xz -C /usr/local/bin mcp-grafana \
  && chmod +x /usr/local/bin/mcp-grafana
 
-# ttyd — web terminal (static x86_64 binary from GitHub releases), see docs/.../web-terminal.
+# ttyd — web terminal (static binary for the target arch from GitHub releases), see docs/.../web-terminal.
 # The version is pinned for the same reason as mcp-grafana above.
 ARG TTYD_VERSION=1.7.7
-RUN curl -fsSL --retry 5 --retry-all-errors "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.x86_64" \
+RUN case "${TARGETARCH:-amd64}" in arm64) a=aarch64 ;; *) a=x86_64 ;; esac \
+ && curl -fsSL --retry 5 --retry-all-errors "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.${a}" \
       -o /usr/local/bin/ttyd \
  && chmod +x /usr/local/bin/ttyd
 
 # ngrok v3 — public tunnel to the web terminal (see --tunnel). A static binary
 # from the official CDN; the version is pinned for the same reason as ttyd/mcp-grafana above.
 ARG NGROK_VERSION=3.18.4
-RUN curl -fsSL --retry 5 --retry-all-errors "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v${NGROK_VERSION}-stable-linux-amd64.tgz" \
+RUN case "${TARGETARCH:-amd64}" in arm64) a=arm64 ;; *) a=amd64 ;; esac \
+ && curl -fsSL --retry 5 --retry-all-errors "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v${NGROK_VERSION}-stable-linux-${a}.tgz" \
       | tar -xz -C /usr/local/bin ngrok \
  && chmod +x /usr/local/bin/ngrok
 
 # cloudflared — token-free tunnel backend (TryCloudflare). Used by default
 # when NGROK_AUTHTOKEN is not set. We pull latest: TryCloudflare requires a recent build,
 # and cloudflared is backward compatible (we run it with --no-autoupdate).
-RUN curl -fsSL --retry 5 --retry-all-errors "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64" \
+RUN case "${TARGETARCH:-amd64}" in arm64) a=arm64 ;; *) a=amd64 ;; esac \
+ && curl -fsSL --retry 5 --retry-all-errors "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${a}" \
       -o /usr/local/bin/cloudflared \
  && chmod +x /usr/local/bin/cloudflared
 

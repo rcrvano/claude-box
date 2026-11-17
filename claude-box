@@ -83,10 +83,11 @@ case "${1:-}" in
             tunnel_env=(WEB_TUNNEL=1)
           fi
         fi
-        env "${tunnel_env[@]}" docker compose up -d web
+        # ${arr[@]+...}: an empty array under `set -u` is "unbound" in bash < 4.4 (macOS bash 3.2)
+        env ${tunnel_env[@]+"${tunnel_env[@]}"} docker compose up -d web
         echo "Web terminal up: http://localhost:${PORT}"
         echo "Web terminal with notification up: https://localhost:${TLS_PORT}"
-        if [ -n "${tunnel_env[*]}" ]; then
+        if [ -n "${tunnel_env[*]+x}" ]; then
           if grep -qE '^NGROK_AUTHTOKEN=.+' .env 2>/dev/null; then
             echo "Bringing up a public tunnel (ngrok)…"
           else
