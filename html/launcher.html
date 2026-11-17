@@ -180,6 +180,23 @@
   .box .stat.run i{background:var(--work);animation:pulse 1.2s infinite} .box .stat.wait i{background:var(--wait)} .box .stat.idle i{background:var(--live)}
   .sendbtn{width:32px;height:32px;border-radius:50%;border:0;background:var(--ink);color:#fff;cursor:pointer;font-size:16px;display:inline-flex;align-items:center;justify-content:center}
   .sendbtn:disabled{opacity:.3;cursor:default} .stopbtn{background:var(--work)}
+  /* voice input */
+  .micbtn{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--slate);
+          cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0}
+  .micbtn:hover{background:var(--hover);color:var(--ink)}
+  .micbtn svg{width:16px;height:16px}
+  .micbtn.on{background:var(--work);border-color:var(--work);color:#fff;animation:micpulse 1.4s ease-in-out infinite}
+  @keyframes micpulse{0%,100%{box-shadow:0 0 0 0 rgba(217,119,87,.45)}50%{box-shadow:0 0 0 7px rgba(217,119,87,0)}}
+  .langbtn{border:0;background:transparent;color:var(--mute);font:600 11px var(--mono);cursor:pointer;padding:4px 2px}
+  .langbtn:hover{color:var(--ink)}
+  .voice{display:none;align-items:center;gap:8px;margin:0 2px 6px;padding:6px 10px;border-radius:10px;background:var(--paper);
+         color:var(--slate);font-size:13.5px;min-height:32px}
+  .voice.on{display:flex}
+  .voice .bars{display:inline-flex;gap:2px;align-items:center;height:14px;flex:0 0 auto}
+  .voice .bars i{width:3px;background:var(--work);border-radius:2px;animation:bar .9s ease-in-out infinite}
+  .voice .bars i:nth-child(2){animation-delay:.15s}.voice .bars i:nth-child(3){animation-delay:.3s}.voice .bars i:nth-child(4){animation-delay:.45s}
+  @keyframes bar{0%,100%{height:4px}50%{height:14px}}
+  .voice .txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:italic}
 
   @media (max-width:760px){
     .app{grid-template-columns:1fr}
@@ -323,6 +340,86 @@ function wsConnect(){
 }
 function wsSend(o){ if(WSOPEN){ try{ WS.send(JSON.stringify(o)); return true; }catch(_){} } return false; }
 
+// ======================= voice input (Web Speech API) =======================
+// Dictation into the composer: final phrases are appended to the textarea, the phrase being
+// spoken is shown live in the strip above it. Recognition runs in the browser (Chrome sends audio
+// to Google, Safari to Apple) — nothing goes through this server. Needs a secure context (https).
+// Mobile browsers misbehave in continuous mode (Android Chrome repeats earlier phrases), so there
+// we recognize one phrase at a time and restart until the user stops.
+var VOICE=(function(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  var LANGS=[['ru-RU','RU'],['en-US','EN']];
+  var mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  var lang=ls('cb.voiceLang')||'ru-RU';
+  var V={supported:!!SR, active:null, rec:null, base:'', finals:'', want:false};
+  V.label=function(){ for(var i=0;i<LANGS.length;i++) if(LANGS[i][0]===lang) return LANGS[i][1]; return lang; };
+  V.cycleLang=function(){
+    var i=0; for(;i<LANGS.length;i++) if(LANGS[i][0]===lang) break;
+    lang=LANGS[(i+1)%LANGS.length][0]; ls('cb.voiceLang',lang);
+    [].forEach.call(document.querySelectorAll('.langbtn'), function(b){ b.textContent=V.label(); });
+    if(V.active){ var p=V.active; V.stop(true); V.start(p); }        // restart in the new language
+  };
+  function show(p, interim){
+    var t=p.voiceEl.querySelector('.txt'); t.textContent = interim || 'Listening… ('+V.label()+')';
+  }
+  function commit(p, interim){
+    var txt=(V.finals+(interim?interim:'')).replace(/\s+/g,' ').trim();
+    p.ta.value = V.base + (V.base && txt && !/\s$/.test(V.base) ? ' ' : '') + txt;
+    p.ta.dispatchEvent(new Event('input'));
+  }
+  function startRec(p){
+    var r=new SR(); V.rec=r;
+    r.lang=lang; r.interimResults=true; r.continuous=!mobile; r.maxAlternatives=1;
+    r.onresult=function(e){
+      var interim='';
+      for(var i=e.resultIndex;i<e.results.length;i++){
+        var res=e.results[i], t=res[0].transcript;
+        if(res.isFinal) V.finals+=(V.finals?' ':'')+t.trim(); else interim+=t;
+      }
+      commit(p, ''); show(p, interim.trim());
+      p.lastInterim=interim.trim();
+    };
+    r.onerror=function(e){
+      if(e.error==='no-speech' || e.error==='aborted') return;
+      V.want=false;
+      var msg = e.error==='not-allowed' || e.error==='service-not-allowed'
+        ? 'Microphone access was denied. Allow it in the browser (it needs https — port 8443 or the tunnel).'
+        : (e.error==='network' ? 'Voice recognition needs internet access (the browser uses its cloud recognizer).' : 'Voice input error: '+e.error);
+      note(p, esc(msg), true);
+    };
+    r.onend=function(){
+      if(V.rec!==r) return;
+      if(V.want && V.active===p){ try{ startRec(p); }catch(_){ finish(p); } return; }   // keep listening
+      finish(p);
+    };
+    r.start();
+  }
+  function finish(p){
+    if(p.lastInterim){ V.finals+=(V.finals?' ':'')+p.lastInterim; p.lastInterim=''; commit(p,''); }
+    V.rec=null; V.active=null; V.want=false;
+    p.mic.classList.remove('on'); p.voiceEl.classList.remove('on');
+  }
+  V.start=function(p){
+    if(!SR) return;
+    if(!window.isSecureContext){ note(p,'Voice input needs https — open the launcher on port 8443 or via the tunnel.',true); return; }
+    if(V.active) V.stop(true);
+    V.active=p; V.want=true; V.finals=''; V.base=p.ta.value; p.lastInterim='';
+    p.mic.classList.add('on'); p.voiceEl.classList.add('on'); show(p,'');
+    try{ startRec(p); }catch(e){ finish(p); note(p, esc('Voice input failed to start: '+e.message), true); }
+  };
+  // keep=true: the phrase being spoken right now is kept as text (stop by the user / before sending)
+  V.stop=function(keep){
+    var p=V.active; if(!p) return;
+    V.want=false;
+    var r=V.rec; V.rec=null;
+    if(!keep) p.lastInterim='';
+    finish(p);
+    try{ r && r.stop(); }catch(_){}
+  };
+  V.toggle=function(p){ if(V.active===p) V.stop(true); else V.start(p); };
+  return V;
+})();
+
 // ======================= panes =======================
 function makePane(key, opts){
   var p={key:key, wire:key, token:opts.token||null, cwd:opts.cwd||'', mode:opts.mode, used:Date.now(),
@@ -335,10 +432,13 @@ function buildChat(p){
   var c=el('div','chat');
   c.innerHTML='<div class="log"><div class="inner"></div></div>'+
     '<div class="composer"><div class="wrap"><div class="banners"></div><div class="perms"></div>'+
-    '<div class="box"><textarea rows="1" placeholder="Message Claude…"></textarea>'+
+    '<div class="box"><div class="voice"><span class="bars"><i></i><i></i><i></i><i></i></span><span class="txt">Listening…</span></div>'+
+    '<textarea rows="1" placeholder="Message Claude…"></textarea>'+
     '<div class="bar"><select title="Permission mode"><option value="default">Ask before edits</option>'+
     '<option value="acceptEdits">Accept edits</option><option value="plan">Plan mode</option><option value="auto">Auto</option></select>'+
     '<span class="stat"><i></i><span></span></span>'+
+    (VOICE.supported ? '<button class="langbtn" type="button" title="Voice input language"></button>'+
+      '<button class="micbtn" type="button" title="Voice input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>' : '')+
     '<button class="sendbtn stopbtn hidden" type="button" title="Stop (Esc)">■</button>'+
     '<button class="sendbtn go" type="button" title="Send (Enter)" disabled>↑</button></div></div></div></div>';
   views.appendChild(c);
@@ -351,10 +451,16 @@ function buildChat(p){
     p.go.disabled=!p.ta.value.trim(); }
   p.ta.addEventListener('input', grow);
   p.ta.addEventListener('keydown', function(e){
-    if(e.key==='Enter' && !e.shiftKey && !e.isComposing){ e.preventDefault(); send(p); }
+    if(e.key==='Enter' && !e.shiftKey && !e.isComposing){ e.preventDefault(); VOICE.stop(true); send(p); }
+    else if(e.key==='Escape' && VOICE.active===p){ e.preventDefault(); VOICE.stop(true); }
     else if(e.key==='Escape' && (p.state==='running'||p.state==='requires_action')){ e.preventDefault(); wsSend({op:'interrupt', key:p.wire}); }
   });
-  p.go.addEventListener('click', function(){ send(p); });
+  p.go.addEventListener('click', function(){ VOICE.stop(true); send(p); });
+  p.mic=c.querySelector('.micbtn'); p.voiceEl=c.querySelector('.voice'); p.langb=c.querySelector('.langbtn');
+  if(p.mic){
+    p.mic.addEventListener('click', function(){ VOICE.toggle(p); });
+    p.langb.textContent=VOICE.label(); p.langb.addEventListener('click', function(){ VOICE.cycleLang(); });
+  }
   p.stopb.addEventListener('click', function(){ wsSend({op:'interrupt', key:p.wire}); });
   p.sel.addEventListener('change', function(){ wsSend({op:'mode', key:p.wire, mode:p.sel.value}); });
   if(!p.token) p.ta.placeholder='Message Claude in '+base(p.cwd)+'…';
@@ -378,6 +484,7 @@ function send(p){
 
 function activate(key){
   var p=PANES[key]; if(!p) return;
+  if(VOICE.active && VOICE.active!==p) VOICE.stop(true);
   ACTIVE=key; p.used=Date.now();
   if(p.mode==='console') ensureIframe(p); else { if(!p.el) openChat(p); }
   Object.keys(PANES).forEach(function(k){ var q=PANES[k];
