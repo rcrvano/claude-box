@@ -320,6 +320,7 @@
       <div class="ftools">
         <input id="ffilter" class="finput" type="search" placeholder="Filter folders" autocomplete="off">
         <select id="fsort" title="Sort by"><option value="recent">Recently modified</option><option value="name">Name</option><option value="sessions">Most sessions</option></select>
+        <button class="btn ghost" type="button" id="fterm" title="bash in the container (gh auth login, git, …)">&gt;_ Terminal</button>
         <button class="btn ghost" type="button" id="fnew">＋ New folder</button>
         <button class="btn" type="button" id="fclone">Clone from Git</button>
       </div>
@@ -1243,6 +1244,7 @@ function renderJobs(){
 }
 $('newconsole').addEventListener('click', newConsole);
 $('termbtn').addEventListener('click', function(){ openShell('/workspace'); });
+$('fterm').addEventListener('click', function(){ openShell('/workspace'); });
 $('fjobs').addEventListener('click', function(e){ var b=e.target.closest('[data-start]'); if(b) startIn(b.getAttribute('data-start')); });
 
 // folder "⋯" menu (shares the floating #menu with the session rows)
