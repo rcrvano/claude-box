@@ -6,6 +6,7 @@
 //   /metrics     -> claude-web-metrics (JSON)
 //   /chat/ws     -> web chat over the Claude Agent SDK (claude-web-chat.js), /chat/info, /dirs
 //   /categories  -> GET/POST the sidebar categories (~/.claude/web-categories.json)
+//   /workspace   -> folder page: GET list, POST /workspace/{mkdir,rename,clone} (claude-web-workspace.js)
 //   /term,/token,/ws -> proxy to the internal ttyd (127.0.0.1:TTYD_PORT)
 const http = require('http');
 const https = require('https');
@@ -45,6 +46,15 @@ function writeCats(o) {
   const tmp = CATS_FILE + '.' + process.pid + '.tmp';
   fs.mkdirSync(require('path').dirname(CATS_FILE), { recursive: true });
   fs.writeFileSync(tmp, JSON.stringify(o)); fs.renameSync(tmp, CATS_FILE);
+}
+let workspace = null;
+try { workspace = require(process.env.WEB_WORKSPACE_MODULE || '/usr/local/lib/claude-web/web-workspace.js'); }
+catch (e) { console.error('workspace manager disabled:', e.message); }
+// small JSON request bodies only
+function readJson(req, limit, cb) {
+  let body = '', big = false;
+  req.on('data', (d) => { body += d; if (body.length > limit) { big = true; req.destroy(); } });
+  req.on('end', () => { if (big) return; let o = null; try { o = JSON.parse(body || '{}'); } catch (_) {} cb(o); });
 }
 function json(res, code, obj) {
   try { res.writeHead(code, { 'content-type': 'application/json' }); res.end(typeof obj === 'string' ? obj : JSON.stringify(obj)); } catch (_) {}
@@ -112,6 +122,23 @@ const handler = (req, res) => {
         if (!chat || !m) { json(res, 400, { ok: false }); return; }
         chat.rename(safeDecode(m[1]), title).then((t) => json(res, 200, { ok: true, title: t }),
           (e) => json(res, 400, { ok: false, error: String(e.message || e) }));
+      });
+      return;
+    }
+    if (path === '/workspace' || path.startsWith('/workspace/')) {
+      if (!workspace) { json(res, 503, { error: 'workspace manager not loaded' }); return; }
+      if (req.method !== 'POST') { json(res, 200, workspace.list()); return; }
+      readJson(req, 8192, (o) => {
+        try {
+          if (!o) throw new Error('bad request');
+          const op = path.slice('/workspace/'.length);
+          const r = op === 'mkdir' ? workspace.mkdir(o.name)
+            : op === 'rename' ? workspace.rename(o.from, o.to)
+            : op === 'clone' ? workspace.clone(o.url, o.name)
+            : null;
+          if (!r) { json(res, 404, { error: 'unknown op' }); return; }
+          json(res, 200, Object.assign({ ok: true }, r));
+        } catch (e) { json(res, 400, { ok: false, error: String(e.message || e) }); }
       });
       return;
     }

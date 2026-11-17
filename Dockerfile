@@ -90,6 +90,7 @@ RUN mkdir -p /opt/claude-web-chat && cd /opt/claude-web-chat \
       "@anthropic-ai/claude-agent-sdk@${CLAUDE_AGENT_SDK_VERSION}" "ws@${WS_VERSION}" \
  && npm cache clean --force
 COPY scripts/web-chat.js /usr/local/lib/claude-web/web-chat.js
+COPY scripts/web-workspace.js /usr/local/lib/claude-web/web-workspace.js
 
 # Custom ttyd frontend (--index): sound on bell, hidden scroll, deep-link.
 # xterm is vendored locally (html/vendor) and inlined into a self-contained index.html
