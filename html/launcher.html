@@ -1088,7 +1088,7 @@
   @media (max-width:760px){ #agv .prl{flex-basis:120px} }
   .rpspin{display:inline-block;width:9px;height:9px;border:2px solid var(--mute);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-1px}
   @keyframes spin{to{transform:rotate(360deg)}}
-  @media (max-width:1100px){
+  @media (max-width:1280px){
     .app.rp{grid-template-columns:var(--side) minmax(0,1fr)}
     #rpanel{position:fixed;z-index:18;right:0;top:0;bottom:0;width:min(92vw,var(--rp));box-shadow:0 0 40px rgba(0,0,0,.25)}
     .app.art,.app.art.artwide{grid-template-columns:var(--side) minmax(0,1fr)}
@@ -1594,8 +1594,12 @@ var VOICE=(function(){
     r.onresult=function(e){
       var interim='';
       for(var i=e.resultIndex;i<e.results.length;i++){
-        var res=e.results[i], t=res[0].transcript;
-        if(res.isFinal) V.finals+=(V.finals?' ':'')+t.trim(); else interim+=t;
+        var res=e.results[i], t=res[0].transcript.trim();
+        if(res.isFinal){
+          // Android Chrome replays the previous phrase (sometimes many times) when the recognition
+          // restarts: drop consecutive duplicate finals, keep the genuinely repeated word
+          if(t && t!==V.lastFinal){ V.finals+=(V.finals?' ':'')+t; V.lastFinal=t; }
+        } else interim+=res[0].transcript;
       }
       commit(p, ''); show(p, interim.trim()); hush();
       p.lastInterim=interim.trim();
@@ -1626,7 +1630,7 @@ var VOICE=(function(){
     if(!SR) return;
     if(!window.isSecureContext){ note(p,'Voice input needs https — open the launcher on port 8443 or via the tunnel.',true); return; }
     if(V.active) V.stop(true);
-    V.active=p; V.want=true; V.finals=''; V.base=p.ta.value; p.lastInterim='';
+    V.active=p; V.want=true; V.finals=''; V.lastFinal=''; V.base=p.ta.value; p.lastInterim='';
     p.mic.classList.add('on'); p.voiceEl.classList.add('on'); show(p,'');
     try{ startRec(p); }catch(e){ finish(p); note(p, esc('Voice input failed to start: '+e.message), true); }
     hush();
