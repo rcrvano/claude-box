@@ -3872,8 +3872,9 @@ function statLine(p){
   if(p.info.cost!=null) bits.push('$'+Number(p.info.cost).toFixed(2));
   return {cls:cls, text:bits.join(' · ')};
 }
-// the status line alone: also repainted every second by the activity clock
-function statPaint(p){ var l=statLine(p); p.stat.className='stat '+l.cls; p.stat.querySelector('span').textContent=l.text; }
+// the status line alone: also repainted every second by the activity clock.
+// Only the colored dot shows; the words (working…/ready, model, cost) moved into the hover tooltip.
+function statPaint(p){ var l=statLine(p); p.stat.className='stat '+l.cls; p.stat.title=l.text; p.stat.querySelector('span').textContent=''; }
 function renderStatus(p){
   if(!p.stat) return;
   var st=p.state;
