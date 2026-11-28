@@ -12,3 +12,5 @@ scripts/*.sh
 !scripts/web-entry.sh
 !scripts/claude-default.sh
 docker-compose*.yml
+# site deploy leftovers (wrangler tmp cache) — nothing in the image needs them
+.wrangler/
