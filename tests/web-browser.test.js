@@ -87,7 +87,7 @@ test('the screen follows the tab, within limits', async () => {
   assert.deepStrictEqual(await b.resize(1281, 801), { changed: true, w: 1280, h: 800 });
   assert.deepStrictEqual(await b.resize(1280, 800), { changed: false, w: 1280, h: 800 });
   assert.deepStrictEqual(await b.resize(100, 50), { changed: true, w: 640, h: 400 });
-  assert.deepStrictEqual(await b.resize(99999, 99999), { changed: true, w: 3840, h: 2160 });
+  assert.deepStrictEqual(await b.resize(99999, 99999), { changed: true, w: 7680, h: 4320 });
 });
 
 test('a Slack permalink opens in the web app (no "Launching…" page) once the team id is known', () => {

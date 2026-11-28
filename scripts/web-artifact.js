@@ -9,7 +9,10 @@ const path = require('path');
 
 const HOME = process.env.HOME || '/home/node';
 const SNAP_DIR = process.env.CB_ARTIFACT_DIR || path.join(HOME, '.claude', 'web-artifacts');
-const ROOTS = () => (process.env.CB_ARTIFACT_SERVE_ROOTS || '/workspace').split(':').filter(Boolean).concat([SNAP_DIR]);
+// show_artifact writes to .artifacts/ of the session folder (~/.claude/projects/<slug>/…), so the
+// projects dir must be servable too, or the panel's latest version renders a bare "403" page.
+const ROOTS = () => (process.env.CB_ARTIFACT_SERVE_ROOTS ||
+  ['/workspace', path.join(HOME, '.claude', 'projects')].join(':')).split(':').filter(Boolean).concat([SNAP_DIR]);
 const TYPES = { '.html': 'text/html; charset=utf-8', '.htm': 'text/html; charset=utf-8', '.svg': 'image/svg+xml', '.md': 'text/plain; charset=utf-8' };
 // the page may load scripts, styles, fonts and images from anywhere (CDNs) but stays sandboxed
 const CSP = "sandbox allow-scripts allow-forms allow-popups allow-modals; frame-ancestors 'self'; " +

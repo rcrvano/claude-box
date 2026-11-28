@@ -88,3 +88,19 @@ test('the file route: sandboxed, only artifact files under the allowed folders',
     assert.strictEqual(art.stat(path.join(tmp, 'outside.html')).error, 403);
   } finally { srv.close(); }
 });
+
+test('artifact serving covers the session folder (~/.claude/projects)', () => {
+  // show_artifact writes to .artifacts/ of the session folder (~/.claude/projects/<slug>/…), and
+  // the panel opens that original path for the latest version — the serve roots must include it
+  const projDir = path.join(process.env.HOME, '.claude', 'projects', '-w-x', 'sess1');
+  fs.mkdirSync(path.join(projDir, '.artifacts'), { recursive: true });
+  const f = path.join(projDir, '.artifacts', 'board.html');
+  fs.writeFileSync(f, '<h1>board</h1>');
+  const prev = process.env.CB_ARTIFACT_SERVE_ROOTS;
+  delete process.env.CB_ARTIFACT_SERVE_ROOTS;                     // exercise the built-in defaults
+  try {
+    const served = art.resolveFile(f);
+    assert.ok(!served.error, 'resolveFile rejected the session folder: ' + served.error);
+    assert.strictEqual(fs.readFileSync(served.real, 'utf8'), '<h1>board</h1>');
+  } finally { if (prev !== undefined) process.env.CB_ARTIFACT_SERVE_ROOTS = prev; }
+});
